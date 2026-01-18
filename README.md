@@ -1,36 +1,120 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💸 Safe-to-Splurge (Web PoC)
 
-## Getting Started
+A web-only proof-of-concept that calculates a user's **safe-to-splurge** amount per pay cycle based on:
 
-First, run the development server:
+- 📅 Pay schedule (weekly / fortnightly / monthly; split pay supported)
+- 🧾 Fixed bills (fixed date, payday-relative, date windows)
+- 🏦 Fixed savings commitment (protected savings)
+- 🛒 Essentials baselines (groceries + transport)
+- 💰 Optional sinking funds (e.g., quarterly utilities)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+The PoC also includes an **AI insights layer** for explainability and personalized suggestions.
+
+> ⚠️ **Important:** AI never computes the number; it only explains and recommends.
+
+---
+
+## 💡 Product Concept
+
+Most budgeting apps either shame spending or overwhelm users with categories.
+
+This app is built around a positive loop:
+
+1. 👤 Get a quick "sense" of the user's situation (manual onboarding)
+2. 🔒 Lock a fixed savings amount per pay cycle
+3. 🧮 Compute **Safe-to-Splurge Now** and **Safe-to-Splurge If You Wait**
+4. 📈 Show payoff if the user skips or delays
+5. ✅ Encourage intentional splurging with guardrails
+6. 🤖 Use AI for explanations and personalization (not arithmetic)
+
+---
+
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|------------|---------|
+| ⚡ **Next.js** | App Router |
+| 📘 **TypeScript** | Type safety |
+| 📦 **pnpm** | Package manager |
+| 🐘 **Postgres** | Persistence (recommended) |
+| 🔷 **Prisma** | ORM/migrations (recommended) |
+| 🤖 **AI Provider** | Insights integration (optional, behind service boundary) |
+
+---
+
+## 🏗️ Architecture (Repo Structure)
+
+The codebase is intentionally split so the core logic stays testable and deterministic.
+
+```
+src/
+├── app/                # 🌐 Next.js routes + pages
+│   └── api/            # 🔌 API route handlers (thin)
+├── domain/             # 🧠 Pure business logic (no DB, no network)
+│   ├── schedules/      # 📅 Pay schedule + bill schedule rule generators
+│   ├── engine/         # ⚙️ Forecast + safe-to-splurge computation
+│   └── models/         # 📋 Domain types (input/output contracts)
+├── services/           # 🔗 AI insights, adapters, notifications (optional)
+├── db/                 # 🗄️ Prisma schema + migrations (optional)
+└── tests/              # 🧪 Scenario tests (fixtures)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> 📌 **Rule:** `src/domain` must remain pure functions.
+>
+> 💬 **Reason:** Correctness + scenario testing + easy refactors.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Run Dev Server
 
-## Learn More
+```bash
+pnpm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+🌍 Open [http://localhost:3000](http://localhost:3000)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📖 Core Concepts
 
-## Deploy on Vercel
+### 1. 📅 Pay Cycle
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- A pay cycle is the unit of planning: weekly / fortnightly / monthly (irregular can be added later)
+- May include split pay events (e.g., Wed + Thu deposits)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2. 🔐 Protected Commitments
+
+Money reserved before any discretionary spend:
+
+- 🎯 Fixed savings goal per cycle
+- ➡️ Mandatory transfers
+- 🪣 Sinking funds (quarterly utilities, annual fees, etc.)
+
+### 3. 🧾 Obligations (Bills)
+
+Scheduled outflows inside the forecast window:
+
+| Type | Example |
+|------|---------|
+| 📆 Fixed day monthly | 18th of each month |
+| 💵 Payday-relative | Friday after payday |
+| 🪟 Date window | 16th OR 21st |
+| 🔄 Quarterly | Every 3 months |
+
+### 4. 🛒 Essentials Baseline
+
+Baseline spending per cycle:
+
+- 🥦 Groceries
+- 🚌 Transport
+
+*(Other essentials can be added later.)*
+
+### 5. 🎉 Safe-to-Splurge
+
+Computed for two windows:
+
+| Window | Description |
+|--------|-------------|
+| ⏰ **Now** | Current moment to next payday |
+| ⏳ **If You Wait** | Next payday to following payday |
