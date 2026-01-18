@@ -31,13 +31,13 @@ This app is built around a positive loop:
 
 ## 🛠️ Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| ⚡ **Next.js** | App Router |
-| 📘 **TypeScript** | Type safety |
-| 📦 **pnpm** | Package manager |
-| 🐘 **Postgres** | Persistence (recommended) |
-| 🔷 **Prisma** | ORM/migrations (recommended) |
+| Technology         | Purpose                                                  |
+| ------------------ | -------------------------------------------------------- |
+| ⚡ **Next.js**     | App Router                                               |
+| 📘 **TypeScript**  | Type safety                                              |
+| 📦 **pnpm**        | Package manager                                          |
+| 🐘 **Postgres**    | Persistence (recommended)                                |
+| 🔷 **Prisma**      | ORM/migrations (recommended)                             |
 | 🤖 **AI Provider** | Insights integration (optional, behind service boundary) |
 
 ---
@@ -49,13 +49,13 @@ The codebase is intentionally split so the core logic stays testable and determi
 ```
 src/
 ├── app/                # 🌐 Next.js routes + pages
-│   └── api/            # 🔌 API route handlers (thin)
+│   ├── api/            # 🔌 API route handlers (thin)
+│   └── db/             # 🗄️ Prisma schema + migrations (optional)
 ├── domain/             # 🧠 Pure business logic (no DB, no network)
-│   ├── schedules/      # 📅 Pay schedule + bill schedule rule generators
 │   ├── engine/         # ⚙️ Forecast + safe-to-splurge computation
-│   └── models/         # 📋 Domain types (input/output contracts)
+│   ├── models/         # 📋 Domain types (input/output contracts)
+│   └── schedule/       # 📅 Pay schedule + bill schedule rule generators
 ├── services/           # 🔗 AI insights, adapters, notifications (optional)
-├── db/                 # 🗄️ Prisma schema + migrations (optional)
 └── tests/              # 🧪 Scenario tests (fixtures)
 ```
 
@@ -94,12 +94,12 @@ Money reserved before any discretionary spend:
 
 Scheduled outflows inside the forecast window:
 
-| Type | Example |
-|------|---------|
-| 📆 Fixed day monthly | 18th of each month |
-| 💵 Payday-relative | Friday after payday |
-| 🪟 Date window | 16th OR 21st |
-| 🔄 Quarterly | Every 3 months |
+| Type                 | Example             |
+| -------------------- | ------------------- |
+| 📆 Fixed day monthly | 18th of each month  |
+| 💵 Payday-relative   | Friday after payday |
+| 🪟 Date window       | 16th OR 21st        |
+| 🔄 Quarterly         | Every 3 months      |
 
 ### 4. 🛒 Essentials Baseline
 
@@ -108,13 +108,13 @@ Baseline spending per cycle:
 - 🥦 Groceries
 - 🚌 Transport
 
-*(Other essentials can be added later.)*
+_(Other essentials can be added later.)_
 
 ### 5. 🎉 Safe-to-Splurge
 
 Computed for two windows:
 
-| Window | Description |
-|--------|-------------|
-| ⏰ **Now** | Current moment to next payday |
+| Window             | Description                     |
+| ------------------ | ------------------------------- |
+| ⏰ **Now**         | Current moment to next payday   |
 | ⏳ **If You Wait** | Next payday to following payday |
