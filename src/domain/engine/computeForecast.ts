@@ -1,7 +1,18 @@
 import { nextPayday, billsInWindow } from "domain/schedules/scheduleHelper";
+import { Baseline, Bill, ForecastOutput } from "@/domain/types/forecast"; // Adjust the import path as needed
+
+interface ForecastInput {
+  // Define your input structure here
+  payAmount: number;
+  payFrequency: string; // e.g., "weekly", "biweekly"
+  bills: Bill[];
+  baselines: Baseline[];
+  commitments: number;
+  buffer: number;
+}
 
 export async function computeForecast(
-  input: string,
+  input: ForecastInput,
 ): Promise<ForecastOutput | undefined> {
   //Determine compute windows
   // get current date

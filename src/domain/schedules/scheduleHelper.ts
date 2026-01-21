@@ -1,15 +1,17 @@
+import { Bill, PaySchedule } from "../types/forecast";
+
 export function nextPayday(paySchedule: PaySchedule) {
   //get the compute windows A and B
-  const nextDateOfPay = new Date();
+  const payDate = new Date(paySchedule.payDate);
   const frequency: string = paySchedule.frequency;
   if (frequency == "weekly") {
-    nextDateOfPay.setDate(paySchedule.nextPayDate.getDate() + 7);
+    payDate.setDate(payDate.getDate() + 7);
   } else if (frequency == "fortnightly") {
-    nextDateOfPay.setDate(paySchedule.nextPayDate.getDate() + 14);
-  } else {
-    nextDateOfPay.setDate(paySchedule.nextPayDate.getDate());
+    payDate.setDate(payDate.getDate() + 14);
+  } else if (frequency == "monthly") {
+    payDate.setMonth(payDate.getMonth() + 1);
   }
-  return nextDateOfPay;
+  return payDate;
 }
 
 export function billsInWindow(
