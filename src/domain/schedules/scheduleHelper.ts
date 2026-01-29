@@ -17,16 +17,19 @@ export function nextPayday(paySchedule: PaySchedule) {
 export function billsInWindow(
   bills: Bill[],
   windowStart: Date,
-  windowEnd: Date,
   paySchedule: PaySchedule,
 ): any {
-  windowStart = new Date();
-  windowEnd = nextPayday(paySchedule);
-  let billAmount: number = 0;
+  const windowEnd = nextPayday(paySchedule);
+  let totalBillAmount: number = 0;
+  let billOccurence: Bill[] = [];
   for (const bill of bills) {
-    if (bill.scheduleRule >= windowStart && bill.scheduleRule <= windowEnd) {
-      billAmount += bill.amount;
+    if (bill.dueDate >= windowStart && bill.dueDate <= windowEnd) {
+      totalBillAmount += bill.amount;
+      billOccurence.push(bill);
     }
   }
-  return billAmount;
+  return {
+    bills: billOccurence,
+    totalAmount: totalBillAmount,
+  };
 }

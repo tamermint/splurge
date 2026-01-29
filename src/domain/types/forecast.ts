@@ -11,7 +11,6 @@ export type Bill = {
   amount: number;
   dueDate: Date;
   scheduleType: string;
-  scheduleRule: Date;
   payRail: string;
 };
 
@@ -26,9 +25,10 @@ export type Baseline = {
 
 export type ForecastInput = {
   paySchedule: PaySchedule;
-  bill: Bill;
-  commitment: Commitment;
-  baseline: Baseline;
+  bills: Bill[];
+  commitments: Commitment[];
+  baselines: Baseline[];
+  buffer: number;
 };
 
 export type ForecastOutput = {
