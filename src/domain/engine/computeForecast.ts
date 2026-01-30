@@ -22,7 +22,7 @@ export async function computeForecast(
   // get current date
   const today: Date = new Date();
   //get the payDate
-  const payDate: Date = input.paySchedule.payDate;
+  const payDate: Date = new Date(input.paySchedule.payDate);
   //get paySchedule
   const paySchedule = input.paySchedule;
   //get pay amount
@@ -31,19 +31,14 @@ export async function computeForecast(
   const bills: Bill[] = input.bills;
 
   //isolate bills in windowA
-  const allBillsInWindowA = billsInWindow(bills, today, paySchedule).bills;
-  const totalBillAmountInWindowA = billsInWindow(
-    bills,
-    today,
-    paySchedule,
-  ).totalAmount;
+  const windowAResult = billsInWindow(bills, today, paySchedule);
+  const allBillsInWindowA = windowAResult.bills;
+  const totalBillAmountInWindowA = windowAResult.totalAmount;
+
   //isolate bills in windowB
-  const allBillsInWindowB = billsInWindow(bills, payDate, paySchedule).bills;
-  const totalBillAmountInWindowB = billsInWindow(
-    bills,
-    payDate,
-    paySchedule,
-  ).totalAmount;
+  const windowBresult = billsInWindow(bills, payDate, paySchedule);
+  const allBillsInWindowB = windowBresult.bills;
+  const totalBillAmountInWindowB = windowBresult.totalAmount;
   //get all baselines
   const baselines: Baseline[] = input.baselines;
   let totalBaselineAmount: number = 0;
@@ -69,47 +64,45 @@ export async function computeForecast(
   let statusA: string = "";
   let statusB: string = "";
   //Compute Window A: today -> next pay
-  if (today < payDate) {
-    //payDate is upcoming
-    //add all amounts
-    const totalAmountInWindowA: number =
-      totalBillAmountInWindowA +
-      totalCommitmentAmount +
-      totalBaselineAmount +
-      expenseBuffer;
-    //splurgeNow = pay amount - commitment - all bills - all baselines - buffer
-    splurgeNowA = payAmount - totalAmountInWindowA;
-    //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
-    splurgeNowA == 100
-      ? (statusA = "green")
-      : splurgeNowA < 100 && splurgeNowA > 50
-        ? (statusA = "amber")
-        : (statusA = "red");
-    //breakdown
-    console.log("Pay amount in window A: ", payAmount);
-    console.log("Obligations in window A: ", allBillsInWindowA);
-    console.log("Safe to splurge this window: ", splurgeNowA);
-    console.log("Status is: ", statusA);
-  } else {
-    //add all amounts
-    const totalAmountInWindowB: number =
-      totalBillAmountInWindowB +
-      totalCommitmentAmount +
-      totalBaselineAmount +
-      expenseBuffer;
-    //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
-    splurgeNowB = payAmount - totalAmountInWindowB;
-    splurgeNowB == 100
-      ? (statusB = "green")
-      : splurgeNowB < 100 && splurgeNowB > 50
-        ? (statusB = "amber")
-        : (statusB = "red");
-    //breakdown
-    console.log("Pay amount in window B: ", payAmount);
-    console.log("Obligations in window B: ", allBillsInWindowB);
-    console.log("Safe to splurge this window: ", splurgeNowB);
-    console.log("Status is: ", statusB);
-  }
+  //payDate is upcoming
+  //add all amounts
+  const totalAmountInWindowA: number =
+    totalBillAmountInWindowA +
+    totalCommitmentAmount +
+    totalBaselineAmount +
+    expenseBuffer;
+  //splurgeNow = pay amount - commitment - all bills - all baselines - buffer
+  splurgeNowA = payAmount - totalAmountInWindowA;
+  //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
+  splurgeNowA >= 100
+    ? (statusA = "green")
+    : splurgeNowA < 100 && splurgeNowA > 50
+      ? (statusA = "amber")
+      : (statusA = "red");
+  //breakdown
+  console.log("Pay amount in window A: ", payAmount);
+  console.log("Obligations in window A: ", allBillsInWindowA);
+  console.log("Safe to splurge this window: ", splurgeNowA);
+  console.log("Status is: ", statusA);
+
+  //add all amounts
+  const totalAmountInWindowB: number =
+    totalBillAmountInWindowB +
+    totalCommitmentAmount +
+    totalBaselineAmount +
+    expenseBuffer;
+  //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
+  splurgeNowB = payAmount - totalAmountInWindowB;
+  splurgeNowB >= 100
+    ? (statusB = "green")
+    : splurgeNowB < 100 && splurgeNowB > 50
+      ? (statusB = "amber")
+      : (statusB = "red");
+  //breakdown
+  console.log("Pay amount in window B: ", payAmount);
+  console.log("Obligations in window B: ", allBillsInWindowB);
+  console.log("Safe to splurge this window: ", splurgeNowB);
+  console.log("Status is: ", statusB);
 
   //return ForecastOutput
   return [

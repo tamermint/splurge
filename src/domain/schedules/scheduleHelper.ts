@@ -19,15 +19,28 @@ export function billsInWindow(
   windowStart: Date,
   paySchedule: PaySchedule,
 ): any {
-  const windowEnd = nextPayday(paySchedule);
+  const payDate: Date = new Date(paySchedule.payDate);
+  let windowEnd: Date;
+  if (windowStart < payDate) {
+    windowEnd = payDate;
+  } else if (windowStart == payDate) {
+    windowEnd = nextPayday(paySchedule);
+  } else {
+    windowEnd = nextPayday(paySchedule);
+  }
+  console.log(windowStart);
+  console.log(windowEnd);
   let totalBillAmount: number = 0;
   let billOccurence: Bill[] = [];
   for (const bill of bills) {
-    if (bill.dueDate >= windowStart && bill.dueDate <= windowEnd) {
+    const dueDate = new Date(bill.dueDate);
+    if (dueDate >= windowStart && dueDate < windowEnd) {
       totalBillAmount += bill.amount;
       billOccurence.push(bill);
     }
   }
+  console.log(totalBillAmount);
+  console.log(billOccurence);
   return {
     bills: billOccurence,
     totalAmount: totalBillAmount,
