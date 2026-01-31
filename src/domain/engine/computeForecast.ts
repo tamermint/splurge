@@ -1,44 +1,55 @@
-import { billsInWindow } from "domain/schedules/scheduleHelper";
+import { billsInWindow, nextPayday } from "domain/schedules/scheduleHelper";
 import {
   Baseline,
   Bill,
   PaySchedule,
   Commitment,
+  ForecastInput,
   ForecastOutput,
+  Breakdown,
+  BillsInWindowResult,
 } from "@/domain/types/forecast"; // Adjust the import path as needed
-
-interface ForecastInput {
-  paySchedule: PaySchedule;
-  bills: Bill[];
-  commitments: Commitment[];
-  baselines: Baseline[];
-  buffer: number;
-}
 
 export async function computeForecast(
   input: ForecastInput,
-): Promise<ForecastOutput[] | undefined> {
-  //Determine compute window
-  // get current date
+): Promise<ForecastOutput | undefined> {
+  /*Determine the compute windows */
+  //get paySchedule
+  const paySchedule: PaySchedule = input.paySchedule;
+
+  // get date ranges - windowStart and windowEnd
   const today: Date = new Date();
+
+  let windowEnd: Date;
+
   //get the payDate
   const payDate: Date = new Date(input.paySchedule.payDate);
-  //get paySchedule
-  const paySchedule = input.paySchedule;
+
+  //get the bills
+  const bills: Bill[] = input.bills;
+
+  let windowAResult: BillsInWindowResult;
+  let windowBresult: BillsInWindowResult;
+
+  let allBillsInWindowA: Bill[];
+  let allBillsInWindowB: Bill[];
+
+  let totalBillAmountInWindowA: number;
+  let totalBillAmountInWindowB: number;
+
+  windowAResult = billsInWindow(bills, today, payDate);
+  allBillsInWindowA = windowAResult.bills;
+  totalBillAmountInWindowA = windowAResult.totalAmount;
+
+  windowEnd = nextPayday(paySchedule);
+  windowBresult = billsInWindow(bills, payDate, windowEnd);
+  allBillsInWindowB = windowBresult.bills;
+  totalBillAmountInWindowB = windowBresult.totalAmount;
+
   //get pay amount
   const payAmount: number = input.paySchedule.totalAmount;
   //get bills and total bill amounts
-  const bills: Bill[] = input.bills;
 
-  //isolate bills in windowA
-  const windowAResult = billsInWindow(bills, today, paySchedule);
-  const allBillsInWindowA = windowAResult.bills;
-  const totalBillAmountInWindowA = windowAResult.totalAmount;
-
-  //isolate bills in windowB
-  const windowBresult = billsInWindow(bills, payDate, paySchedule);
-  const allBillsInWindowB = windowBresult.bills;
-  const totalBillAmountInWindowB = windowBresult.totalAmount;
   //get all baselines
   const baselines: Baseline[] = input.baselines;
   let totalBaselineAmount: number = 0;
@@ -72,18 +83,22 @@ export async function computeForecast(
     totalBaselineAmount +
     expenseBuffer;
   //splurgeNow = pay amount - commitment - all bills - all baselines - buffer
-  splurgeNowA = payAmount - totalAmountInWindowA;
+  splurgeNowA = Math.round((payAmount - totalAmountInWindowA) * 100) / 100;
   //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
   splurgeNowA >= 100
     ? (statusA = "green")
-    : splurgeNowA < 100 && splurgeNowA > 50
+    : splurgeNowA < 100 && splurgeNowA >= 50
       ? (statusA = "amber")
       : (statusA = "red");
   //breakdown
-  console.log("Pay amount in window A: ", payAmount);
-  console.log("Obligations in window A: ", allBillsInWindowA);
-  console.log("Safe to splurge this window: ", splurgeNowA);
-  console.log("Status is: ", statusA);
+  const breakdownA: Breakdown = {
+    income: payAmount,
+    commitments: commitments,
+    baselines: baselines,
+    buffer: expenseBuffer,
+    totalBillAmount: totalBillAmountInWindowA,
+    allBills: allBillsInWindowA,
+  };
 
   //add all amounts
   const totalAmountInWindowB: number =
@@ -92,29 +107,33 @@ export async function computeForecast(
     totalBaselineAmount +
     expenseBuffer;
   //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
-  splurgeNowB = payAmount - totalAmountInWindowB;
+  splurgeNowB = Math.round((payAmount - totalAmountInWindowB) * 100) / 100;
   splurgeNowB >= 100
     ? (statusB = "green")
-    : splurgeNowB < 100 && splurgeNowB > 50
+    : splurgeNowB < 100 && splurgeNowB >= 50
       ? (statusB = "amber")
       : (statusB = "red");
   //breakdown
-  console.log("Pay amount in window B: ", payAmount);
-  console.log("Obligations in window B: ", allBillsInWindowB);
-  console.log("Safe to splurge this window: ", splurgeNowB);
-  console.log("Status is: ", statusB);
+  const breakdownB: Breakdown = {
+    income: payAmount,
+    commitments: commitments,
+    baselines: baselines,
+    buffer: expenseBuffer,
+    totalBillAmount: totalBillAmountInWindowB,
+    allBills: allBillsInWindowB,
+  };
 
   //return ForecastOutput
-  return [
-    {
-      safeToSplurgeNow: splurgeNowA,
-      safeToSplurgeIfWait: statusA == "green" ? true : false,
-      statusNow: statusA,
+  return {
+    now: {
+      safeToSplurge: splurgeNowA,
+      status: statusA,
+      breakdown: breakdownA,
     },
-    {
-      safeToSplurgeNow: splurgeNowB,
-      safeToSplurgeIfWait: statusB == "green" ? true : false,
-      statusNow: statusB,
+    ifWait: {
+      safeToSplurge: splurgeNowB,
+      status: statusB,
+      breakdown: breakdownB,
     },
-  ];
+  };
 }

@@ -31,8 +31,21 @@ export type ForecastInput = {
   buffer: number;
 };
 
+export type Breakdown = {
+  income: number;
+  commitments: Commitment[];
+  baselines: Baseline[];
+  buffer: number;
+  totalBillAmount: number;
+  allBills: Bill[];
+};
+
 export type ForecastOutput = {
-  safeToSplurgeNow: number;
-  safeToSplurgeIfWait: boolean;
-  statusNow: string;
+  now: Object;
+  ifWait: Object;
+};
+
+export type BillsInWindowResult = {
+  bills: Bill[];
+  totalAmount: number;
 };

@@ -1,7 +1,12 @@
 import { Bill, PaySchedule } from "../types/forecast";
 
+interface BillsInWindowResult {
+  bills: Bill[];
+  totalAmount: number;
+}
+
 export function nextPayday(paySchedule: PaySchedule) {
-  //get the compute windows A and B
+  //get the next payday
   const payDate = new Date(paySchedule.payDate);
   const frequency: string = paySchedule.frequency;
   if (frequency == "weekly") {
@@ -17,19 +22,8 @@ export function nextPayday(paySchedule: PaySchedule) {
 export function billsInWindow(
   bills: Bill[],
   windowStart: Date,
-  paySchedule: PaySchedule,
-): any {
-  const payDate: Date = new Date(paySchedule.payDate);
-  let windowEnd: Date;
-  if (windowStart < payDate) {
-    windowEnd = payDate;
-  } else if (windowStart == payDate) {
-    windowEnd = nextPayday(paySchedule);
-  } else {
-    windowEnd = nextPayday(paySchedule);
-  }
-  console.log(windowStart);
-  console.log(windowEnd);
+  windowEnd: Date,
+): BillsInWindowResult {
   let totalBillAmount: number = 0;
   let billOccurence: Bill[] = [];
   for (const bill of bills) {
@@ -39,8 +33,6 @@ export function billsInWindow(
       billOccurence.push(bill);
     }
   }
-  console.log(totalBillAmount);
-  console.log(billOccurence);
   return {
     bills: billOccurence,
     totalAmount: totalBillAmount,
