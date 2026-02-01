@@ -8,22 +8,20 @@ import {
   ForecastOutput,
   Breakdown,
   BillsInWindowResult,
-} from "@/domain/types/forecast"; // Adjust the import path as needed
+} from "@/domain/types/forecast";
 
 export async function computeForecast(
   input: ForecastInput,
+  today: Date,
 ): Promise<ForecastOutput | undefined> {
   /*Determine the compute windows */
   //get paySchedule
   const paySchedule: PaySchedule = input.paySchedule;
 
-  // get date ranges - windowStart and windowEnd
-  const today: Date = new Date();
-
   let windowEnd: Date;
 
   //get the payDate
-  const payDate: Date = new Date(input.paySchedule.payDate);
+  const payDate: Date = input.paySchedule.payDate;
 
   //get the bills
   const bills: Bill[] = input.bills;

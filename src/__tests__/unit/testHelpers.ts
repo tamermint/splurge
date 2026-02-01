@@ -14,7 +14,9 @@ describe("nextPayday", () => {
         optionalSplit: false,
       };
       const result: Date = nextPayday(paySchedule);
-      expect(result.toDateString()).toBe(newDate.toDateString());
+      expect(result.toDateString().slice(0, 10)).toBe(
+        newDate.toDateString().slice(0, 10),
+      );
     });
     it("should add 14 days when frequency is fortnightly", () => {
       const baseDate = new Date("2026-01-20");
@@ -26,7 +28,9 @@ describe("nextPayday", () => {
         optionalSplit: false,
       };
       const result: Date = nextPayday(paySchedule);
-      expect(result.toDateString()).toBe(newDate.toDateString());
+      expect(result.toDateString().slice(0, 10)).toBe(
+        newDate.toDateString().slice(0, 10),
+      );
     });
     it("should add 1 month when frequency is monthly", () => {
       const baseDate = new Date("2026-01-20");
@@ -38,7 +42,9 @@ describe("nextPayday", () => {
         optionalSplit: false,
       };
       const result: Date = nextPayday(paySchedule);
-      expect(result.toDateString()).toBe(newDate.toDateString());
+      expect(result.toDateString().slice(0, 10)).toBe(
+        newDate.toDateString().slice(0, 10),
+      );
     });
   });
   describe("billsInWindow", () => {

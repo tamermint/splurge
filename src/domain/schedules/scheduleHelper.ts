@@ -5,9 +5,9 @@ interface BillsInWindowResult {
   totalAmount: number;
 }
 
-export function nextPayday(paySchedule: PaySchedule) {
+export function nextPayday(paySchedule: PaySchedule): Date {
   //get the next payday
-  const payDate = new Date(paySchedule.payDate);
+  const payDate: Date = new Date(paySchedule.payDate);
   const frequency: string = paySchedule.frequency;
   if (frequency == "weekly") {
     payDate.setDate(payDate.getDate() + 7);
