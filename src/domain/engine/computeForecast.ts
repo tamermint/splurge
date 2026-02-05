@@ -33,11 +33,14 @@ export async function computeForecast(
   //get paySchedule
   const paySchedule: PaySchedule = input.paySchedule;
 
+  //get frequency
+  const frequency: string = input.paySchedule.frequency;
+
   //get the bills
   const bills: Bill[] = input.bills;
 
   let activePayDay: Date = nextPayDayAfter(today, paySchedule);
-  let followingPayDay: Date = nextPayday(activePayDay, paySchedule.frequency);
+  let followingPayDay: Date = nextPayday(activePayDay, frequency);
 
   windowAResult = billsInWindow(bills, today, activePayDay);
   allBillsInWindowA = windowAResult.bills;
@@ -132,7 +135,7 @@ export async function computeForecast(
       breakdown: breakdownA,
     },
     ifWait: {
-      safeToSplurge: splurgeNowB,
+      safeToSplurge: splurgeNowB + splurgeNowA,
       status: statusB,
       breakdown: breakdownB,
     },
