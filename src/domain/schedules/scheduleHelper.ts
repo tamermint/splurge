@@ -5,30 +5,30 @@ interface BillsInWindowResult {
   totalAmount: number;
 }
 
-export function nextPayday(payDate: Date, frequency: String): Date {
+export function nextPayday(payDate: Date, frequency: string): Date {
   //get the next payday
+  let resultDate: Date = structuredClone(payDate);
   if (frequency == "weekly") {
-    payDate.setDate(payDate.getDate() + 7);
+    resultDate.setDate(resultDate.getDate() + 7);
   } else if (frequency == "fortnightly") {
-    payDate.setDate(payDate.getDate() + 14);
+    resultDate.setDate(resultDate.getDate() + 14);
   } else if (frequency == "monthly") {
-    payDate.setMonth(payDate.getMonth() + 1);
+    resultDate.setMonth(resultDate.getMonth() + 1);
   }
-  return payDate;
+  return resultDate;
 }
 
 export function nextPayDayAfter(
   fromDate: Date,
   paySchedule: PaySchedule,
 ): Date {
-  const payDate: Date = new Date(paySchedule.payDate);
-  const frequency: String = new String(paySchedule.frequency);
-  let nextPayDateInFuture: Date;
-  while (fromDate <= payDate) {
-    payDate.setDate(payDate.getDate() + 14);
+  let payDate: Date = structuredClone(paySchedule.payDate);
+  const frequency: string = paySchedule.frequency;
+  while (payDate <= fromDate) {
+    payDate = nextPayday(payDate, frequency);
   }
-  nextPayDateInFuture = nextPayday(payDate, frequency);
-  return nextPayDateInFuture;
+
+  return payDate;
 }
 
 export function billsInWindow(

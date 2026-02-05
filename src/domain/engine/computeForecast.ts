@@ -1,4 +1,8 @@
-import { billsInWindow, nextPayday } from "domain/schedules/scheduleHelper";
+import {
+  billsInWindow,
+  nextPayday,
+  nextPayDayAfter,
+} from "domain/schedules/scheduleHelper";
 import {
   Baseline,
   Bill,
@@ -15,17 +19,8 @@ export async function computeForecast(
   today: Date,
 ): Promise<ForecastOutput | undefined> {
   /*Determine the compute windows */
-  //get paySchedule
-  const paySchedule: PaySchedule = input.paySchedule;
 
-  let windowEnd: Date;
-
-  //get the payDate
-  const payDate: Date = input.paySchedule.payDate;
-
-  //get the bills
-  const bills: Bill[] = input.bills;
-
+  //Declare the compute window variables
   let windowAResult: BillsInWindowResult;
   let windowBresult: BillsInWindowResult;
 
@@ -35,12 +30,20 @@ export async function computeForecast(
   let totalBillAmountInWindowA: number;
   let totalBillAmountInWindowB: number;
 
-  windowAResult = billsInWindow(bills, today, payDate);
+  //get paySchedule
+  const paySchedule: PaySchedule = input.paySchedule;
+
+  //get the bills
+  const bills: Bill[] = input.bills;
+
+  let activePayDay: Date = nextPayDayAfter(today, paySchedule);
+  let followingPayDay: Date = nextPayday(activePayDay, paySchedule.frequency);
+
+  windowAResult = billsInWindow(bills, today, activePayDay);
   allBillsInWindowA = windowAResult.bills;
   totalBillAmountInWindowA = windowAResult.totalAmount;
 
-  windowEnd = nextPayday(paySchedule);
-  windowBresult = billsInWindow(bills, payDate, windowEnd);
+  windowBresult = billsInWindow(bills, activePayDay, followingPayDay);
   allBillsInWindowB = windowBresult.bills;
   totalBillAmountInWindowB = windowBresult.totalAmount;
 
@@ -51,14 +54,14 @@ export async function computeForecast(
   //get all baselines
   const baselines: Baseline[] = input.baselines;
   let totalBaselineAmount: number = 0;
-  for (let baseline in baselines) {
-    totalBaselineAmount += baselines[baseline].amount;
+  for (let baseline of baselines) {
+    totalBaselineAmount += baseline.amount;
   }
   //get all commitments
   const commitments: Commitment[] = input.commitments;
   let totalCommitmentAmount: number = 0;
-  for (let commitment in commitments) {
-    totalCommitmentAmount += commitments[commitment].savingsAmount;
+  for (let commitment of commitments) {
+    totalCommitmentAmount += commitment.savingsAmount;
   }
   //add all amounts
   //Get buffer
