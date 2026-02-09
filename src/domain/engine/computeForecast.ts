@@ -3,6 +3,7 @@ import {
   nextPayday,
   nextPayDayAfter,
 } from "domain/schedules/scheduleHelper";
+import { getSplurgeStatus, getSplurgeAmount } from "./calculateSplurge";
 import {
   Baseline,
   Bill,
@@ -12,14 +13,18 @@ import {
   ForecastOutput,
   Breakdown,
   BillsInWindowResult,
+  ForecastInputSchema,
 } from "@/domain/types/forecast";
-import { z } from "zod";
 
 export async function computeForecast(
   input: ForecastInput,
   today: Date,
 ): Promise<ForecastOutput | Error> {
-  /*Determine the compute windows */
+  // Validate input using Zod schema
+  const validationResult = ForecastInputSchema.safeParse(input);
+  if (!validationResult.success) {
+    return Error(`Invalid forecast input: ${validationResult.error.message}`);
+  }
 
   //get paySchedule
   const paySchedule: PaySchedule = input.paySchedule;
@@ -29,14 +34,6 @@ export async function computeForecast(
 
   //get the bills
   const bills: Bill[] = input.bills;
-
-  if (!paySchedule || !frequency) {
-    return Error("paySchedule or frequency is incorrect!");
-  }
-
-  if (!bills || bills.length == 0) {
-    return Error("Please ensure you have atleast one bill available!");
-  }
 
   //Declare the compute window variables
   let windowAResult: BillsInWindowResult;
@@ -85,8 +82,8 @@ export async function computeForecast(
   //for Window A
   let splurgeNowA: number = 0;
   let splurgeNowB: number = 0;
-  let statusA: string = "";
-  let statusB: string = "";
+  let statusA;
+  let statusB;
   //Compute Window A: today -> next pay
   //payDate is upcoming
   //add all amounts
@@ -96,13 +93,9 @@ export async function computeForecast(
     totalBaselineAmount +
     expenseBuffer;
   //splurgeNow = pay amount - commitment - all bills - all baselines - buffer
-  splurgeNowA = Math.round((payAmount - totalAmountInWindowA) * 100) / 100;
+  splurgeNowA = getSplurgeAmount(payAmount, totalAmountInWindowA);
   //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
-  splurgeNowA >= 100
-    ? (statusA = "green")
-    : splurgeNowA < 100 && splurgeNowA >= 50
-      ? (statusA = "amber")
-      : (statusA = "red");
+  statusA = getSplurgeStatus(splurgeNowA);
   //breakdown
   const breakdownA: Breakdown = {
     income: payAmount,
@@ -120,13 +113,8 @@ export async function computeForecast(
     totalBaselineAmount +
     expenseBuffer;
   //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
-  splurgeNowB =
-    Math.round((payAmount - totalAmountInWindowB) * 100) / 100 + splurgeNowA;
-  splurgeNowB >= 100
-    ? (statusB = "green")
-    : splurgeNowB < 100 && splurgeNowB >= 50
-      ? (statusB = "amber")
-      : (statusB = "red");
+  splurgeNowB = getSplurgeAmount(payAmount, totalAmountInWindowB) + splurgeNowA;
+  statusB = getSplurgeStatus(splurgeNowB);
   //breakdown
   const breakdownB: Breakdown = {
     income: payAmount,

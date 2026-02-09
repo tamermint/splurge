@@ -1,51 +1,61 @@
-export type PaySchedule = {
-  frequency: string;
-  payDate: Date;
-  totalAmount: number;
-  optionalSplit: boolean;
-};
+import { z } from "zod";
 
-export type Bill = {
-  id: number;
-  name: string;
-  amount: number;
-  dueDate: Date;
-  scheduleType: string;
-  payRail: string;
-};
+export const PayScheduleSchema = z.object({
+  frequency: z.string(),
+  payDate: z.date(),
+  totalAmount: z.number(),
+  optionalSplit: z.boolean(),
+});
+export type PaySchedule = z.infer<typeof PayScheduleSchema>;
 
-export type Commitment = {
-  savingsAmount: number;
-};
+export const BillSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  amount: z.number(),
+  dueDate: z.date(),
+  scheduleType: z.string(),
+  payRail: z.string(),
+});
+export type Bill = z.infer<typeof BillSchema>;
 
-export type Baseline = {
-  name: string;
-  amount: number;
-};
+export const CommitmentSchema = z.object({
+  savingsAmount: z.number(),
+});
+export type Commitment = z.infer<typeof CommitmentSchema>;
 
-export type ForecastInput = {
-  paySchedule: PaySchedule;
-  bills: Bill[];
-  commitments: Commitment[];
-  baselines: Baseline[];
-  buffer: number;
-};
+export const BaselineSchema = z.object({
+  name: z.string(),
+  amount: z.number(),
+});
+export type Baseline = z.infer<typeof BaselineSchema>;
 
-export type Breakdown = {
-  income: number;
-  commitments: Commitment[];
-  baselines: Baseline[];
-  buffer: number;
-  totalBillAmount: number;
-  allBills: Bill[];
-};
+export const ForecastInputSchema = z.object({
+  paySchedule: PayScheduleSchema,
+  bills: z.array(BillSchema),
+  commitments: z.array(CommitmentSchema),
+  baselines: z.array(BaselineSchema),
+  buffer: z.number(),
+});
+export type ForecastInput = z.infer<typeof ForecastInputSchema>;
 
-export type ForecastOutput = {
-  now: Object;
-  ifWait: Object;
-};
+export const BreakdownSchema = z.object({
+  income: z.number(),
+  commitments: z.array(CommitmentSchema),
+  baselines: z.array(BaselineSchema),
+  buffer: z.number(),
+  totalBillAmount: z.number(),
+  allBills: z.array(BillSchema),
+});
+export type Breakdown = z.infer<typeof BreakdownSchema>;
 
-export type BillsInWindowResult = {
-  bills: Bill[];
-  totalAmount: number;
-};
+export const ForecastOutputSchema = z.object({
+  now: z.any(),
+  ifWait: z.any(),
+});
+export type ForecastOutput = z.infer<typeof ForecastOutputSchema>;
+
+export const BillsInWindowResultSchema = z.object({
+  bills: z.array(BillSchema),
+  totalAmount: z.number(),
+});
+export type BillsInWindowResult = z.infer<typeof BillsInWindowResultSchema>;
