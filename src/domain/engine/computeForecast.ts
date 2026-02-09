@@ -13,12 +13,30 @@ import {
   Breakdown,
   BillsInWindowResult,
 } from "@/domain/types/forecast";
+import { z } from "zod";
 
 export async function computeForecast(
   input: ForecastInput,
   today: Date,
-): Promise<ForecastOutput | undefined> {
+): Promise<ForecastOutput | Error> {
   /*Determine the compute windows */
+
+  //get paySchedule
+  const paySchedule: PaySchedule = input.paySchedule;
+
+  //get frequency
+  const frequency: string = input.paySchedule.frequency;
+
+  //get the bills
+  const bills: Bill[] = input.bills;
+
+  if (!paySchedule || !frequency) {
+    return Error("paySchedule or frequency is incorrect!");
+  }
+
+  if (!bills || bills.length == 0) {
+    return Error("Please ensure you have atleast one bill available!");
+  }
 
   //Declare the compute window variables
   let windowAResult: BillsInWindowResult;
@@ -29,15 +47,6 @@ export async function computeForecast(
 
   let totalBillAmountInWindowA: number;
   let totalBillAmountInWindowB: number;
-
-  //get paySchedule
-  const paySchedule: PaySchedule = input.paySchedule;
-
-  //get frequency
-  const frequency: string = input.paySchedule.frequency;
-
-  //get the bills
-  const bills: Bill[] = input.bills;
 
   let activePayDay: Date = nextPayDayAfter(today, paySchedule);
   let followingPayDay: Date = nextPayday(activePayDay, frequency);
@@ -111,7 +120,8 @@ export async function computeForecast(
     totalBaselineAmount +
     expenseBuffer;
   //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
-  splurgeNowB = Math.round((payAmount - totalAmountInWindowB) * 100) / 100;
+  splurgeNowB =
+    Math.round((payAmount - totalAmountInWindowB) * 100) / 100 + splurgeNowA;
   splurgeNowB >= 100
     ? (statusB = "green")
     : splurgeNowB < 100 && splurgeNowB >= 50
@@ -135,7 +145,7 @@ export async function computeForecast(
       breakdown: breakdownA,
     },
     ifWait: {
-      safeToSplurge: splurgeNowB + splurgeNowA,
+      safeToSplurge: splurgeNowB,
       status: statusB,
       breakdown: breakdownB,
     },
