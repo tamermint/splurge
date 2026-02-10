@@ -10,6 +10,26 @@ import { computeForecast } from "@/domain/engine/computeForecast";
 import "next/jest.js";
 
 describe("computeForecast", () => {
+  it("should validate input and return error for invalid data", async () => {
+    const date = new Date("2026-02-01");
+    const invalidInput = {
+      paySchedule: {
+        payDate: new Date("2026-02-04"),
+        frequency: "fortnightly",
+        totalAmount: "invalid", // Invalid: should be number
+        optionalSplit: false,
+      },
+      bills: [],
+      commitments: [],
+      baselines: [],
+      buffer: 50,
+    } as unknown as ForecastInput;
+
+    const result = await computeForecast(invalidInput, date);
+    expect(result).toBeInstanceOf(Error);
+    expect((result as Error).message).toContain("Invalid forecast input");
+  });
+
   it("should correctly predict the splurge", async () => {
     const date = new Date("2026-02-01");
     const paySchedule: PaySchedule = {
@@ -93,7 +113,7 @@ describe("computeForecast", () => {
         },
       },
       ifWait: {
-        safeToSplurge: 2024.32,
+        safeToSplurge: 4153.64,
         status: "green",
         breakdown: {
           income: 3704.32,

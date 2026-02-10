@@ -34,7 +34,7 @@ export const ForecastInputSchema = z.object({
   bills: z.array(BillSchema),
   commitments: z.array(CommitmentSchema),
   baselines: z.array(BaselineSchema),
-  buffer: z.number(),
+  buffer: z.number().default(50),
 });
 export type ForecastInput = z.infer<typeof ForecastInputSchema>;
 
@@ -49,8 +49,16 @@ export const BreakdownSchema = z.object({
 export type Breakdown = z.infer<typeof BreakdownSchema>;
 
 export const ForecastOutputSchema = z.object({
-  now: z.any(),
-  ifWait: z.any(),
+  now: z.object({
+    safeToSplurge: z.number(),
+    status: z.string(),
+    breakdown: BreakdownSchema,
+  }),
+  ifWait: z.object({
+    safeToSplurge: z.number(),
+    status: z.string(),
+    breakdown: BreakdownSchema,
+  }),
 });
 export type ForecastOutput = z.infer<typeof ForecastOutputSchema>;
 

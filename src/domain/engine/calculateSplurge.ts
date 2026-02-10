@@ -7,9 +7,9 @@ export function getSplurgeAmount(
   return splurgeAmount;
 }
 
-export function getSplurgeStatus(splurgeAmount: number): string | undefined {
+export function getSplurgeStatus(splurgeAmount: number): string {
   if (typeof splurgeAmount !== "number" || isNaN(splurgeAmount)) {
-    return undefined;
+    return "Not a number!";
   }
   let splurgeStatus: string;
   if (splurgeAmount >= 100) {

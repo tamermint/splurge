@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Comprehensive Forecast Test
-# Today: Jan 30, 2026
-# Window A: Jan 30 - Feb 4 (before payday)
-# Window B: Feb 4 - Feb 18 (after payday until next payday)
+# Today: Feb 11, 2026 (current system date used by API)
+# Window A: Feb 11 - Feb 18 (before next payday)
+# Window B: Feb 18 - Mar 4 (after payday until next payday)
 
 echo "=== COMPREHENSIVE FORECAST TEST ==="
 echo ""
 echo "Test Scenario:"
-echo "- Today: Jan 30, 2026"
+echo "- Today: Feb 11, 2026 (Current System Date)"
 echo "- Pay Date: Feb 4, 2026"
 echo "- Pay Frequency: Fortnightly"
 echo "- Pay Amount: \$3704.32"
@@ -20,13 +20,14 @@ echo "- Buffer: \$50"
 echo "- Total: \$1520"
 echo ""
 echo "Bills:"
-echo "- Bill 1 (Internet): \$55 due Feb 2 (in Window A)"
-echo "- Bill 2 (Electricity): \$120 due Feb 10 (in Window B)"
-echo "- Bill 3 (Phone): \$40 due Feb 16 (in Window B)"
+echo "- Bill 1 (Internet): \$55 due Feb 2 (before today, not in window)"
+echo "- Bill 2 (Electricity): \$120 due Feb 10 (before today, not in window)"
+echo "- Bill 3 (Phone): \$40 due Feb 16 (in Window A: Feb 11 - Feb 18)"
 echo ""
 echo "Expected Results:"
-echo "- Window A: \$3704.32 - \$1520 - \$55 = \$2129.32"
-echo "- Window B: \$3704.32 - \$1520 - \$120 - \$40 = \$2024.32"
+echo "- Window A (Now): \$3704.32 - \$1520 - \$40 = \$2144.32"
+echo "- Window B (If Wait): (\$3704.32 - \$1520 - \$0) + \$2144.32 = \$4328.64"
+echo "  (unsplurged amount from Window A carries to Window B)"
 echo ""
 echo "=== SENDING REQUEST ==="
 echo ""
@@ -53,8 +54,9 @@ curl -X POST http://localhost:3000/api/forecast \
 echo ""
 echo "=== RESPONSE BREAKDOWN ==="
 echo "Window A (Now - Jan 30 to Feb 4):"
-echo "  - Should show: safeToSplurgeNow: 2129.32, status: green"
+echo "  - Should show: safeToSplurge: 2144.32, status: green"
 echo ""
-echo "Window B (After Pay - Feb 4 to Feb 18):"
-echo "  - Should show: safeToSplurgeNow: 2024.32, status: green"
+echo "Window B (If Wait - Feb 4 to Feb 18):"
+echo "  - Should show: safeToSplurge: 4328.64, status: green"
+echo "  - (This includes the \$2144.32 that could have been spent in Window A)"
 echo ""

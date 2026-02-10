@@ -75,15 +75,12 @@ export async function computeForecast(
   //add all amounts
   //Get buffer
   let expenseBuffer: number = input.buffer;
-  if (!input.buffer) {
-    expenseBuffer = 50;
-  }
 
   //for Window A
   let splurgeNowA: number = 0;
   let splurgeNowB: number = 0;
-  let statusA;
-  let statusB;
+  let statusA: string;
+  let statusB: string;
   //Compute Window A: today -> next pay
   //payDate is upcoming
   //add all amounts
