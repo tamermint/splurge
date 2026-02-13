@@ -12,12 +12,17 @@ export function getSplurgeStatus(splurgeAmount: number): string {
     return "Not a number!";
   }
   let splurgeStatus: string;
-  if (splurgeAmount >= 100) {
+  const SPLRUGE_THRESHOLD_GREEN: number = 100;
+  const SPLRUGE_THRESHOLD_AMBER: number = 50;
+
+  if (splurgeAmount >= SPLRUGE_THRESHOLD_GREEN) {
     splurgeStatus = "green";
-  } else if (splurgeAmount >= 50) {
+  } else if (splurgeAmount >= SPLRUGE_THRESHOLD_AMBER) {
     splurgeStatus = "amber";
+  } else if (splurgeAmount >= 0) {
+    splurgeStatus = "frugal";
   } else {
-    splurgeStatus = "red";
+    splurgeStatus = "insolvent";
   }
   return splurgeStatus;
 }

@@ -45,6 +45,7 @@ export const BreakdownSchema = z.object({
   buffer: z.number(),
   totalBillAmount: z.number(),
   allBills: z.array(BillSchema),
+  carryOver: z.number().default(0),
 });
 export type Breakdown = z.infer<typeof BreakdownSchema>;
 
