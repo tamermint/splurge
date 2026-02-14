@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const PayScheduleSchema = z.object({
   frequency: z.string(),
-  payDate: z.date(),
+  payDate: z.coerce.date(),
   totalAmount: z.number(),
   optionalSplit: z.boolean(),
 });
@@ -12,7 +12,7 @@ export const BillSchema = z.object({
   id: z.number(),
   name: z.string(),
   amount: z.number(),
-  dueDate: z.date(),
+  dueDate: z.coerce.date(),
   scheduleType: z.string(),
   payRail: z.string(),
 });
