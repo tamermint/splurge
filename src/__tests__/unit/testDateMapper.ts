@@ -44,7 +44,7 @@ describe("testDateMapper", () => {
       ],
       buffer: 50,
     };
-    const transformedInput = transformIntoDTO(forecastInput as any);
+    const transformedInput = transformIntoDTO(forecastInput as unknown);
     const payScheduleV2 = {
       payDate: new Date("2026-02-04"),
       frequency: "fortnightly",

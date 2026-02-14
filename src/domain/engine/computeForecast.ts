@@ -59,32 +59,25 @@ export async function computeForecast(
   //Get buffer
   const expenseBuffer: number = validationResult.data.buffer;
 
-  //Declare the compute window variables
-  let windowAResult: BillsInWindowResult;
-  let windowBresult: BillsInWindowResult;
-
-  let allBillsInWindowA: Bill[];
-  let allBillsInWindowB: Bill[];
-
-  let totalBillAmountInWindowA: number;
-  let totalBillAmountInWindowB: number;
-
   const activePayDay: Date = nextPayDayAfter(today, paySchedule);
   const followingPayDay: Date = nextPayday(activePayDay, frequency);
 
-  windowAResult = billsInWindow(bills, today, activePayDay);
-  allBillsInWindowA = windowAResult.bills;
-  totalBillAmountInWindowA = windowAResult.totalAmount;
+  const windowAResult: BillsInWindowResult = billsInWindow(
+    bills,
+    today,
+    activePayDay,
+  );
+  const allBillsInWindowA: Bill[] = windowAResult.bills;
+  const totalBillAmountInWindowA: number = windowAResult.totalAmount;
 
-  windowBresult = billsInWindow(bills, activePayDay, followingPayDay);
-  allBillsInWindowB = windowBresult.bills;
-  totalBillAmountInWindowB = windowBresult.totalAmount;
+  const windowBresult: BillsInWindowResult = billsInWindow(
+    bills,
+    activePayDay,
+    followingPayDay,
+  );
+  const allBillsInWindowB: Bill[] = windowBresult.bills;
+  const totalBillAmountInWindowB: number = windowBresult.totalAmount;
 
-  //for Window A
-  let splurgeNowA: number = 0;
-  let splurgeNowB: number = 0;
-  let statusA: string;
-  let statusB: string;
   //Compute Window A: today -> next pay
   //payDate is upcoming
   //add all amounts
@@ -94,9 +87,9 @@ export async function computeForecast(
     totalBaselineAmount +
     expenseBuffer;
   //splurgeNow = pay amount - commitment - all bills - all baselines - buffer
-  splurgeNowA = getSplurgeAmount(payAmount, totalAmountInWindowA);
+  const splurgeNowA: number = getSplurgeAmount(payAmount, totalAmountInWindowA);
   //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
-  statusA = getSplurgeStatus(splurgeNowA);
+  const statusA: string = getSplurgeStatus(splurgeNowA);
   //breakdown
   const breakdownA: Breakdown = {
     income: payAmount,
@@ -115,8 +108,9 @@ export async function computeForecast(
     totalBaselineAmount +
     expenseBuffer;
   //if splurgeNow > 100, status = green, 100 < splurge now < 50, status = amber else status = red
-  splurgeNowB = getSplurgeAmount(payAmount, totalAmountInWindowB) + splurgeNowA;
-  statusB = getSplurgeStatus(splurgeNowB);
+  const splurgeNowB: number =
+    getSplurgeAmount(payAmount, totalAmountInWindowB) + splurgeNowA;
+  const statusB: string = getSplurgeStatus(splurgeNowB);
   //breakdown
   const breakdownB: Breakdown = {
     income: payAmount,
