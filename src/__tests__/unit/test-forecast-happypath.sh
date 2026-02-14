@@ -1,33 +1,32 @@
 #!/bin/bash
 
 # Comprehensive Forecast Test
-# Today: Feb 11, 2026 (current system date used by API)
-# Window A: Feb 11 - Feb 18 (before next payday)
-# Window B: Feb 18 - Mar 4 (after payday until next payday)
+# Today: Feb 11, 2026 (Assumed system date)
+# Window A (Current Cycle): Feb 11 - Feb 18 (Next Payday)
+# Window B (Next Cycle): Feb 18 - Mar 4 (Following Payday)
 
 echo "=== COMPREHENSIVE FORECAST TEST ==="
 echo ""
 echo "Test Scenario:"
-echo "- Today: Feb 11, 2026 (Current System Date)"
-echo "- Pay Date: Feb 4, 2026"
-echo "- Pay Frequency: Fortnightly"
+echo "- Today: Feb 11, 2026"
+echo "- Last Pay Date: Feb 4, 2026"
+echo "- Pay Frequency: Fortnightly (Next is Feb 18)"
 echo "- Pay Amount: \$3704.32"
 echo ""
 echo "Fixed Obligations:"
 echo "- Commitments: \$1100"
 echo "- Baselines: \$370 (groceries \$300 + transport \$70)"
 echo "- Buffer: \$50"
-echo "- Total: \$1520"
+echo "- Total Fixed: \$1520"
 echo ""
-echo "Bills:"
-echo "- Bill 1 (Internet): \$55 due Feb 2 (before today, not in window)"
-echo "- Bill 2 (Electricity): \$120 due Feb 10 (before today, not in window)"
-echo "- Bill 3 (Phone): \$40 due Feb 16 (in Window A: Feb 11 - Feb 18)"
+echo "Bills Logic:"
+echo "- Bill 1 (Internet): \$55 (Feb 2) -> Skipped (Before Today)"
+echo "- Bill 2 (Electricity): \$120 (Feb 10) -> Skipped (Before Today)"
+echo "- Bill 3 (Phone): \$40 (Feb 16) -> Window A (Feb 11 - Feb 18)"
 echo ""
-echo "Expected Results:"
-echo "- Window A (Now): \$3704.32 - \$1520 - \$40 = \$2144.32"
-echo "- Window B (If Wait): (\$3704.32 - \$1520 - \$0) + \$2144.32 = \$4328.64"
-echo "  (unsplurged amount from Window A carries to Window B)"
+echo "Expected Math:"
+echo "- Window A: 3704.32 - (1520 + 40) = \$2144.32"
+echo "- Window B: (3704.32 - 1520) + 2144.32 = \$4328.64"
 echo ""
 echo "=== SENDING REQUEST ==="
 echo ""
@@ -52,11 +51,17 @@ curl -X POST http://localhost:3000/api/forecast \
   }' | jq '.'
 
 echo ""
-echo "=== RESPONSE BREAKDOWN ==="
-echo "Window A (Now - Jan 30 to Feb 4):"
-echo "  - Should show: safeToSplurge: 2144.32, status: green"
+echo "=== RESPONSE VALIDATION ==="
+echo "Success State:"
+echo "  - Should show: .success: true"
 echo ""
-echo "Window B (If Wait - Feb 4 to Feb 18):"
-echo "  - Should show: safeToSplurge: 4328.64, status: green"
-echo "  - (This includes the \$2144.32 that could have been spent in Window A)"
+echo "Window A (data.now):"
+echo "  - safeToSplurge: 2144.32"
+echo "  - status: \"green\""
+echo "  - carryOver: 0"
+echo ""
+echo "Window B (data.ifWait):"
+echo "  - safeToSplurge: 4328.64"
+echo "  - status: \"green\""
+echo "  - carryOver: 2144.32"
 echo ""
