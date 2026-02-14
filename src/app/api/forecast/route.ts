@@ -2,6 +2,7 @@
 
 import { computeForecast } from "domain/engine/computeForecast";
 import { transformIntoDTO } from "./datemapper";
+import { DateMappingError, ValidationError } from "@/lib/errors";
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -10,15 +11,13 @@ export async function POST(request: Request): Promise<Response> {
     const transformedInput = transformIntoDTO(input);
     const forecastOutput = await computeForecast(transformedInput, today);
     return Response.json({ success: true, data: forecastOutput });
-  } catch (e: any) {
-    const errorMessage = e instanceof Error ? e.message : "Unknown error";
-    console.error(e);
-
-    // Distinguish between validation errors (user input) and system errors
-    const isValidationError = errorMessage.includes("Validation failed");
-    const status = isValidationError ? 400 : 500;
-    const errorType = isValidationError ? "validation_error" : "system_error";
-
-    return Response.json({ error: errorMessage, type: errorType }, { status });
+  } catch (error: any) {
+    let status = 500;
+    let type = "system_error";
+    if (error instanceof DateMappingError || error instanceof ValidationError) {
+      status = 400;
+      type = "validation_error";
+    }
+    return Response.json({ success: false, error: error.message }, { status });
   }
 }

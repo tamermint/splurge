@@ -28,7 +28,7 @@ describe("splurgeCalculation", () => {
     const actualOutput = getSplurgeAmount(payAmount, totalWindowAmount);
     expect(expectedOutput).toBe(actualOutput);
   });
-  it("should correctly return the splurge status as red", () => {
+  it("should correctly return the splurge status as insolvent", () => {
     const payAmount: number = 3052.746;
     const totalWindowAmount: number = 4000.455;
     const splurgeAmount: number = getSplurgeAmount(
@@ -36,7 +36,7 @@ describe("splurgeCalculation", () => {
       totalWindowAmount,
     );
     const actualSplurgeStatus: string = getSplurgeStatus(splurgeAmount);
-    const expectedSplurgeStatus: string = "red";
+    const expectedSplurgeStatus: string = "insolvent";
     expect(actualSplurgeStatus).toBe(expectedSplurgeStatus);
   });
   it("should correctly return the splurge status as green", () => {

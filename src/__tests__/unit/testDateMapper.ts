@@ -6,7 +6,7 @@ describe("testDateMapper", () => {
   it("should correctly transform the dates in the input", () => {
     const forecastInput = {
       paySchedule: {
-        payDate: "04-Feb-2026",
+        payDate: "2026-02-04",
         frequency: "fortnightly",
         totalAmount: 3704.32,
         optionalSplit: false,
@@ -16,7 +16,7 @@ describe("testDateMapper", () => {
           id: 1,
           name: "Internet",
           amount: 55,
-          dueDate: "02-Feb-2026",
+          dueDate: "2026-02-02",
           scheduleType: "monthly",
           payRail: "AMEX",
         },
@@ -24,7 +24,7 @@ describe("testDateMapper", () => {
           id: 2,
           name: "Electricity",
           amount: 120,
-          dueDate: "10-Feb-2026",
+          dueDate: "2026-02-10",
           scheduleType: "monthly",
           payRail: "BANK",
         },
@@ -32,7 +32,7 @@ describe("testDateMapper", () => {
           id: 3,
           name: "Phone",
           amount: 40,
-          dueDate: "16-Feb-2026",
+          dueDate: "2026-02-16",
           scheduleType: "monthly",
           payRail: "BANK",
         },
@@ -44,9 +44,9 @@ describe("testDateMapper", () => {
       ],
       buffer: 50,
     };
-    const transformedInput = transformIntoDTO(forecastInput);
+    const transformedInput = transformIntoDTO(forecastInput as any);
     const payScheduleV2 = {
-      payDate: new Date("04-Feb-2026"),
+      payDate: new Date("2026-02-04"),
       frequency: "fortnightly",
       totalAmount: 3704.32,
       optionalSplit: false,
@@ -56,7 +56,7 @@ describe("testDateMapper", () => {
         id: 1,
         name: "Internet",
         amount: 55,
-        dueDate: new Date("02-Feb-2026"),
+        dueDate: new Date("2026-02-02"),
         scheduleType: "monthly",
         payRail: "AMEX",
       },
@@ -64,7 +64,7 @@ describe("testDateMapper", () => {
         id: 2,
         name: "Electricity",
         amount: 120,
-        dueDate: new Date("10-Feb-2026"),
+        dueDate: new Date("2026-02-10"),
         scheduleType: "monthly",
         payRail: "BANK",
       },
@@ -72,7 +72,7 @@ describe("testDateMapper", () => {
         id: 3,
         name: "Phone",
         amount: 40,
-        dueDate: new Date("16-Feb-2026"),
+        dueDate: new Date("2026-02-16"),
         scheduleType: "monthly",
         payRail: "BANK",
       },
@@ -90,7 +90,11 @@ describe("testDateMapper", () => {
       baselines: baselinesV2,
       buffer: bufferV2,
     };
-    expect(typeof forecastInput.paySchedule.payDate).toBe("string");
+    expect(transformedInput.paySchedule.payDate).toBeInstanceOf(Date);
+    expect(transformedInput.paySchedule.payDate.toISOString()).toContain(
+      "2026-02-04",
+    );
+    expect(transformedInput.bills[0].dueDate).toBeInstanceOf(Date);
     expect(transformedInput).toEqual(expectedTransformedInput);
   });
 });

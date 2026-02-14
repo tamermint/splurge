@@ -15,13 +15,13 @@ import {
   BillsInWindowResult,
   ForecastInputSchema,
 } from "@/domain/types/forecast";
-import { ValidationError, ForecastError } from "@/lib/errors";
+import { ValidationError } from "@/lib/errors";
 import { z } from "zod";
 
 export async function computeForecast(
   input: ForecastInput,
   today: Date,
-): Promise<ForecastOutput | ValidationError> {
+): Promise<ForecastOutput> {
   // Validate input using Zod schema
   const validationResult = ForecastInputSchema.safeParse(input);
   if (!validationResult.success) {
@@ -38,6 +38,26 @@ export async function computeForecast(
 
   //get the bills
   const bills: Bill[] = validationResult.data.bills;
+
+  //get pay amount
+  const payAmount: number = validationResult.data.paySchedule.totalAmount;
+  //get bills and total bill amounts
+
+  //get all baselines
+  const baselines: Baseline[] = validationResult.data.baselines;
+  let totalBaselineAmount: number = 0;
+  for (let baseline of baselines) {
+    totalBaselineAmount += baseline.amount;
+  }
+  //get all commitments
+  const commitments: Commitment[] = validationResult.data.commitments;
+  let totalCommitmentAmount: number = 0;
+  for (let commitment of commitments) {
+    totalCommitmentAmount += commitment.savingsAmount;
+  }
+  //add all amounts
+  //Get buffer
+  let expenseBuffer: number = validationResult.data.buffer;
 
   //Declare the compute window variables
   let windowAResult: BillsInWindowResult;
@@ -59,26 +79,6 @@ export async function computeForecast(
   windowBresult = billsInWindow(bills, activePayDay, followingPayDay);
   allBillsInWindowB = windowBresult.bills;
   totalBillAmountInWindowB = windowBresult.totalAmount;
-
-  //get pay amount
-  const payAmount: number = validationResult.data.paySchedule.totalAmount;
-  //get bills and total bill amounts
-
-  //get all baselines
-  const baselines: Baseline[] = validationResult.data.baselines;
-  let totalBaselineAmount: number = 0;
-  for (let baseline of baselines) {
-    totalBaselineAmount += baseline.amount;
-  }
-  //get all commitments
-  const commitments: Commitment[] = validationResult.data.commitments;
-  let totalCommitmentAmount: number = 0;
-  for (let commitment of commitments) {
-    totalCommitmentAmount += commitment.savingsAmount;
-  }
-  //add all amounts
-  //Get buffer
-  let expenseBuffer: number = validationResult.data.buffer;
 
   //for Window A
   let splurgeNowA: number = 0;
