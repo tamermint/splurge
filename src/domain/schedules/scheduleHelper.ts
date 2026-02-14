@@ -18,7 +18,7 @@ export function nextPayday(payDate: Date, frequency: string): Date {
   if (!frequency || typeof frequency !== "string") {
     throw new ValidationError("Invalid frequency!");
   }
-  let resultDate: Date = structuredClone(payDate);
+  const resultDate: Date = structuredClone(payDate);
   if (frequency == "weekly") {
     resultDate.setDate(resultDate.getDate() + 7);
   } else if (frequency == "fortnightly") {
@@ -54,14 +54,14 @@ export function billsInWindow(
   windowEnd: Date,
 ): BillsInWindowResult {
   let totalBillAmount: number = 0;
-  let billOccurence: Bill[] = [];
+  const billOccurence: Bill[] = [];
   if (!bills || bills.length == 0) {
     throw new CalculationError("Bills are either invalid or not available");
   }
   if (isNaN(windowStart.getTime()) || isNaN(windowEnd.getTime())) {
     throw new DateMappingError("Invalid window start or end dates");
   }
-  bills.forEach((bill: any, index: number) => {
+  bills.forEach((bill: Bill, index: number) => {
     const dueDate = new Date(bill.dueDate);
     if (!bill.dueDate) {
       throw new DateMappingError(

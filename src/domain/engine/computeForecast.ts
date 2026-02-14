@@ -46,18 +46,18 @@ export async function computeForecast(
   //get all baselines
   const baselines: Baseline[] = validationResult.data.baselines;
   let totalBaselineAmount: number = 0;
-  for (let baseline of baselines) {
+  for (const baseline of baselines) {
     totalBaselineAmount += baseline.amount;
   }
   //get all commitments
   const commitments: Commitment[] = validationResult.data.commitments;
   let totalCommitmentAmount: number = 0;
-  for (let commitment of commitments) {
+  for (const commitment of commitments) {
     totalCommitmentAmount += commitment.savingsAmount;
   }
   //add all amounts
   //Get buffer
-  let expenseBuffer: number = validationResult.data.buffer;
+  const expenseBuffer: number = validationResult.data.buffer;
 
   //Declare the compute window variables
   let windowAResult: BillsInWindowResult;
@@ -69,8 +69,8 @@ export async function computeForecast(
   let totalBillAmountInWindowA: number;
   let totalBillAmountInWindowB: number;
 
-  let activePayDay: Date = nextPayDayAfter(today, paySchedule);
-  let followingPayDay: Date = nextPayday(activePayDay, frequency);
+  const activePayDay: Date = nextPayDayAfter(today, paySchedule);
+  const followingPayDay: Date = nextPayday(activePayDay, frequency);
 
   windowAResult = billsInWindow(bills, today, activePayDay);
   allBillsInWindowA = windowAResult.bills;
