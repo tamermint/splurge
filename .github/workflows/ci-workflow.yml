@@ -63,3 +63,31 @@ jobs:
       # Step 10: Build - Ultimate sanity check
       - name: Build
         run: pnpm build
+
+      # Step 11: Start the server
+      - name: Start production server
+        run: pnpm start > /tmp/server.log 2>&1 &
+        shell: bash
+
+      # Step 12: Wait for server to be ready
+      - name: Wait for server to be healthy
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 > /dev/null; then
+              echo "Server is ready"
+              exit 0
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 1
+          done
+          echo "Server failed to start"
+          cat /tmp/server.log
+          exit 1
+        shell: bash
+
+      # Step 13: Run integration tests
+      - name: Run integration tests
+        run: |
+          bash src/__tests__/scenarios/test-forecast-happypath.sh
+          bash src/__tests__/scenarios/test-forecast-insolvent.sh
+        shell: bash
