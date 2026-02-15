@@ -15,35 +15,51 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Setup PNPM
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10
-
-      # Step 3: Setup Node.js
+      # Step 2: Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20.x"
-          cache: "pnpm"
 
-      # Step 4: Install dependencies with frozen lockfile
+      # Step 3: Setup PNPM
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+          run_install: false
+
+      # Step 4: Get pnpm store directory
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      # Step 5: Setup pnpm cache
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      # Step 6: Install dependencies with frozen lockfile
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Step 5: Lint - Quality gate check
+      # Step 7: Lint - Quality gate check
       - name: Lint
         run: pnpm lint
 
-      # Step 6: Type-check - Catch TypeScript errors
+      # Step 8: Type-check - Catch TypeScript errors
       - name: Type-check
         run: pnpm exec tsc --noEmit
 
-      # Step 7: Test - Verify logic and math
+      # Step 9: Test - Verify logic and math
       - name: Test
         run: pnpm test
 
-      # Step 8: Build - Ultimate sanity check
+      # Step 10: Build - Ultimate sanity check
       - name: Build
         run: pnpm build
