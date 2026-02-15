@@ -18,6 +18,9 @@ export const BillSchema = z.object({
 });
 export type Bill = z.infer<typeof BillSchema>;
 
+export const FutureBillSchema = BillSchema.omit({ id: true });
+export type FutureBill = z.infer<typeof FutureBillSchema>;
+
 export const CommitmentSchema = z.object({
   savingsAmount: z.number(),
 });
