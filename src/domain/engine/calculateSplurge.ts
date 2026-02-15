@@ -7,9 +7,10 @@ export function getSplurgeAmount(
   if (isNaN(payAmount) || isNaN(totalWindowAmount)) {
     throw new ValidationError("Invalid pay amount or total bill amount");
   }
-  const splurgeAmount: number =
-    Math.round((payAmount - totalWindowAmount) * 100) / 100;
-  return splurgeAmount;
+  const cleanPayAmount: number = Math.round(payAmount * 100);
+  const cleanWindowAmount: number = Math.round(totalWindowAmount * 100);
+  const splurgeAmountCents: number = (cleanPayAmount - cleanWindowAmount) / 100;
+  return splurgeAmountCents;
 }
 
 export function getSplurgeStatus(splurgeAmount: number): string {
