@@ -19,7 +19,7 @@ jobs:
       - name: Setup PNPM
         uses: pnpm/action-setup@v2
         with:
-          version: 9
+          version: 10
 
       # Step 3: Setup Node.js
       - name: Setup Node.js
