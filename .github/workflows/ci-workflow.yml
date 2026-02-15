@@ -4,8 +4,46 @@ on:
     branches:
       - "main"
   pull_request:
-    branches:
-      - "main"
   workflow_dispatch:
 
 jobs:
+  quality-assurance:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Setup PNPM
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      # Step 3: Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      # Step 4: Install dependencies with frozen lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Step 5: Lint - Quality gate check
+      - name: Lint
+        run: pnpm lint
+
+      # Step 6: Type-check - Catch TypeScript errors
+      - name: Type-check
+        run: pnpm exec tsc --noEmit
+
+      # Step 7: Test - Verify logic and math
+      - name: Test
+        run: pnpm test
+
+      # Step 8: Build - Ultimate sanity check
+      - name: Build
+        run: pnpm build
