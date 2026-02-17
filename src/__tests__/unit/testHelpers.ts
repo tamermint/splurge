@@ -50,11 +50,17 @@ describe("scheduleHelper", () => {
     });
     it("should throw ValidationError when frequency is null", () => {
       const baseDate = new Date("2026-01-20");
-      expect(() => nextPayday(baseDate, null as any)).toThrow(ValidationError);
+      const nullFrequency = null as unknown as string;
+      expect(() => nextPayday(baseDate, nullFrequency)).toThrow(
+        ValidationError,
+      );
     });
     it("should throw ValidationError when frequency is not a string", () => {
       const baseDate = new Date("2026-01-20");
-      expect(() => nextPayday(baseDate, 123 as any)).toThrow(ValidationError);
+      const numberFrequency = 123 as unknown as string;
+      expect(() => nextPayday(baseDate, numberFrequency)).toThrow(
+        ValidationError,
+      );
     });
     it("should handle monthly frequency at month boundaries (Jan 31 → Mar 3)", () => {
       const baseDate = new Date("2026-01-31");
@@ -118,13 +124,15 @@ describe("scheduleHelper", () => {
     });
     it("should throw ValidationError when paySchedule is null", () => {
       const fromDate = new Date("2026-01-20");
-      expect(() => nextPayDayAfter(fromDate, null as any)).toThrow(
+      const nullPaySchedule = null as unknown as PaySchedule;
+      expect(() => nextPayDayAfter(fromDate, nullPaySchedule)).toThrow(
         ValidationError,
       );
     });
     it("should throw ValidationError when paySchedule is undefined", () => {
       const fromDate = new Date("2026-01-20");
-      expect(() => nextPayDayAfter(fromDate, undefined as any)).toThrow(
+      const undefinedPaySchedule = undefined as unknown as PaySchedule;
+      expect(() => nextPayDayAfter(fromDate, undefinedPaySchedule)).toThrow(
         ValidationError,
       );
     });
@@ -391,7 +399,8 @@ describe("scheduleHelper", () => {
     it("should return empty result when bills array is null", () => {
       const startDate: Date = new Date("2026-01-15");
       const endDate: Date = new Date("2026-01-29");
-      const result = billsInWindow(null as any, startDate, endDate);
+      const nullBills = null as unknown as (Bill | FutureBill)[];
+      const result = billsInWindow(nullBills, startDate, endDate);
       expect(result.totalAmount).toBe(0);
       expect(result.bills).toStrictEqual([]);
     });
@@ -432,7 +441,7 @@ describe("scheduleHelper", () => {
     it("should throw DateMappingError when bill has missing dueDate", () => {
       const startDate: Date = new Date("2026-01-15");
       const endDate: Date = new Date("2026-01-29");
-      const bills: any[] = [
+      const bills: Array<Partial<Bill>> = [
         {
           id: 1,
           name: "Internet",
@@ -451,7 +460,7 @@ describe("scheduleHelper", () => {
       // The implementation only checks if dueDate is falsy, not if it's a valid date
       const startDate: Date = new Date("2026-01-15");
       const endDate: Date = new Date("2026-01-29");
-      const bills: any[] = [
+      const bills: Array<Partial<Bill>> = [
         {
           id: 1,
           name: "Internet",
@@ -607,7 +616,7 @@ describe("scheduleHelper", () => {
     it("should throw DateMappingError when FutureBill has missing dueDate", () => {
       const startDate: Date = new Date("2026-01-15");
       const endDate: Date = new Date("2026-01-29");
-      const invalidFutureBills: any[] = [
+      const invalidFutureBills: Array<Partial<FutureBill>> = [
         {
           name: "Internet",
           amount: 55,
