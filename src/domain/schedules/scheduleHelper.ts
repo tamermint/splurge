@@ -1,9 +1,10 @@
+import { DateMappingError, ValidationError } from "@/lib/errors";
 import {
-  CalculationError,
-  DateMappingError,
-  ValidationError,
-} from "@/lib/errors";
-import { Bill, PaySchedule } from "../types/forecast";
+  Bill,
+  FutureBill,
+  PaySchedule,
+  BillsInWindowResult,
+} from "../types/forecast";
 
 /**
  * Schedule Helper Module
@@ -21,20 +22,6 @@ import { Bill, PaySchedule } from "../types/forecast";
  *
  * @module domain/schedules/scheduleHelper
  */
-
-/**
- * Result of filtering bills within a time window.
- *
- * Used by `billsInWindow()` to return both the filtered bills and their total amount.
- *
- * @typedef {Object} BillsInWindowResult
- * @property {Bill[]} bills - Array of bills falling within the window
- * @property {number} totalAmount - Sum of all bill amounts in the window (USD)
- */
-interface BillsInWindowResult {
-  bills: Bill[];
-  totalAmount: number;
-}
 
 /**
  * Calculates the next pay date by advancing a given date by one pay cycle.
@@ -256,13 +243,13 @@ export function nextPayDayAfter(
  * // Returns: { bills: [Internet], totalAmount: 50 }
  */
 export function billsInWindow(
-  bills: Bill[],
+  allBills: (Bill | FutureBill)[],
   windowStart: Date,
   windowEnd: Date,
 ): BillsInWindowResult {
   // Validate bills array is provided and non-empty
-  if (!bills || bills.length == 0) {
-    throw new CalculationError("Bills are either invalid or not available");
+  if (!allBills || allBills.length == 0) {
+    return { bills: [], totalAmount: 0 };
   }
 
   // Validate window dates are valid
@@ -270,34 +257,22 @@ export function billsInWindow(
     throw new DateMappingError("Invalid window start or end dates");
   }
 
-  let totalBillAmount: number = 0;
-  const billOccurence: Bill[] = [];
+  const filteredBills: (Bill | FutureBill)[] = allBills.filter(
+    (bill: Bill | FutureBill, index: number) => {
+      if (!bill.dueDate) {
+        throw new DateMappingError(
+          `Bill at index ${index} has missing or invalid due date`,
+        );
+      }
+      return bill.dueDate >= windowStart && bill.dueDate < windowEnd;
+    },
+  );
 
-  // Iterate through bills and filter by window
-  bills.forEach((bill: Bill, index: number) => {
-    // Validate bill has a due date before processing
-    if (!bill.dueDate) {
-      throw new DateMappingError(
-        `Bill at index ${index} has missing or invalid due date`,
-      );
-    }
-
-    // Convert due date to Date object for comparison
-    const dueDate = new Date(bill.dueDate);
-
-    // Check if bill falls within the window: [windowStart, windowEnd)
-    // Inclusive start: dueDate >= windowStart
-    // Exclusive end: dueDate < windowEnd
-    if (dueDate >= windowStart && dueDate < windowEnd) {
-      // Bill is in the window; add to results
-      totalBillAmount += bill.amount;
-      billOccurence.push(bill);
-    }
-  });
+  const total = filteredBills.reduce((sum, bill) => sum + bill.amount, 0);
 
   // Return filtered bills and their total
   return {
-    bills: billOccurence,
-    totalAmount: totalBillAmount,
+    bills: filteredBills,
+    totalAmount: total,
   };
 }

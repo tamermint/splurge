@@ -47,7 +47,7 @@ export const BreakdownSchema = z.object({
   baselines: z.array(BaselineSchema),
   buffer: z.number(),
   totalBillAmount: z.number(),
-  allBills: z.array(BillSchema),
+  allBills: z.array(z.union([BillSchema, FutureBillSchema])),
   carryOver: z.number().default(0),
 });
 export type Breakdown = z.infer<typeof BreakdownSchema>;
@@ -67,7 +67,7 @@ export const ForecastOutputSchema = z.object({
 export type ForecastOutput = z.infer<typeof ForecastOutputSchema>;
 
 export const BillsInWindowResultSchema = z.object({
-  bills: z.array(BillSchema),
+  bills: z.array(z.union([BillSchema, FutureBillSchema])),
   totalAmount: z.number(),
 });
 export type BillsInWindowResult = z.infer<typeof BillsInWindowResultSchema>;

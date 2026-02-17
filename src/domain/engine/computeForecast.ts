@@ -14,9 +14,11 @@ import {
   Breakdown,
   BillsInWindowResult,
   ForecastInputSchema,
+  FutureBill,
 } from "@/domain/types/forecast";
 import { ValidationError } from "@/lib/errors";
 import { z } from "zod";
+import { recurrenceGenerator } from "../rules/recurrenceGenerator";
 
 /**
  * Computes a dual-window forecast of safe-to-splurge amounts.
@@ -112,31 +114,39 @@ export async function computeForecast(
   const followingPayDay: Date = nextPayday(activePayDay, frequency);
 
   // ============================================================================
-  // STEP 4: Window A - Calculate bills due between today and next pay
+  // STEP 4: Calculate bills due between today and following pay day
+  // ============================================================================
+
+  const allBills: FutureBill[] = bills.flatMap((bill) => {
+    return recurrenceGenerator(bill, today, followingPayDay);
+  });
+
+  // ============================================================================
+  // STEP 5: Window A - Calculate bills due between today and next pay
   // ============================================================================
 
   const windowAResult: BillsInWindowResult = billsInWindow(
-    bills,
+    allBills,
     today,
     activePayDay,
   );
-  const allBillsInWindowA: Bill[] = windowAResult.bills;
+  const allBillsInWindowA: (Bill | FutureBill)[] = windowAResult.bills;
   const totalBillAmountInWindowA: number = windowAResult.totalAmount;
 
   // ============================================================================
-  // STEP 5: Window B - Calculate bills due between next pay and following pay
+  // STEP 6: Window B - Calculate bills due between next pay and following pay
   // ============================================================================
 
   const windowBresult: BillsInWindowResult = billsInWindow(
-    bills,
+    allBills,
     activePayDay,
     followingPayDay,
   );
-  const allBillsInWindowB: Bill[] = windowBresult.bills;
+  const allBillsInWindowB: (Bill | FutureBill)[] = windowBresult.bills;
   const totalBillAmountInWindowB: number = windowBresult.totalAmount;
 
   // ============================================================================
-  // STEP 6: Window A Forecast - Calculate safe-to-splurge NOW
+  // STEP 7: Window A Forecast - Calculate safe-to-splurge NOW
   // ============================================================================
   // Safe-to-Splurge Now = Income - (Bills + Commitments + Baselines + Buffer)
   //
@@ -170,7 +180,7 @@ export async function computeForecast(
   };
 
   // ============================================================================
-  // STEP 7: Window B Forecast - Calculate safe-to-splurge IF YOU WAIT
+  // STEP 8: Window B Forecast - Calculate safe-to-splurge IF YOU WAIT
   // ============================================================================
   // Safe-to-Splurge If Wait = (Income Window B - Bills B) + Splurge Now (carry-over)
   //

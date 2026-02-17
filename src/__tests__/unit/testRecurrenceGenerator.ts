@@ -1,6 +1,7 @@
 import { ValidationError, DateMappingError } from "@/lib/errors";
 import { recurrenceGenerator } from "@/domain/rules/recurrenceGenerator";
 import { Bill, FutureBill } from "@/domain/types/forecast";
+import "next/jest.js";
 
 describe("testRecurrenceGenerator", () => {
   it("should correctly return bills in horizon and current date", () => {
@@ -76,7 +77,6 @@ describe("testRecurrenceGenerator", () => {
       fromDate,
       toDate,
     );
-    console.log(actualFutureBills);
     expect(
       actualFutureBills[0].dueDate.toDateString().slice(0, 10),
     ).toStrictEqual(expectedFutureBills[0].dueDate.toDateString().slice(0, 10));

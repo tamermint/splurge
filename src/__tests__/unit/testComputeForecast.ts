@@ -102,7 +102,6 @@ describe("computeForecast", () => {
           totalBillAmount: 55,
           allBills: [
             {
-              id: 1,
               name: "Internet",
               amount: 55,
               dueDate: new Date("2026-02-02"),
@@ -137,7 +136,6 @@ describe("computeForecast", () => {
           totalBillAmount: 160,
           allBills: [
             {
-              id: 2,
               name: "Electricity",
               amount: 120,
               dueDate: new Date("2026-02-10"),
@@ -145,7 +143,6 @@ describe("computeForecast", () => {
               payRail: "BANK",
             },
             {
-              id: 3,
               name: "Phone",
               amount: 40,
               dueDate: new Date("2026-02-16"),
@@ -232,7 +229,6 @@ describe("computeForecast", () => {
           totalBillAmount: 55,
           allBills: [
             {
-              id: 1,
               name: "Internet",
               amount: 55,
               dueDate: new Date("2026-02-02"),
@@ -267,7 +263,6 @@ describe("computeForecast", () => {
           totalBillAmount: 160,
           allBills: [
             {
-              id: 2,
               name: "Electricity",
               amount: 120,
               dueDate: new Date("2026-02-10"),
@@ -275,7 +270,6 @@ describe("computeForecast", () => {
               payRail: "BANK",
             },
             {
-              id: 3,
               name: "Phone",
               amount: 40,
               dueDate: new Date("2026-02-16"),
