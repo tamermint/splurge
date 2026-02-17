@@ -1,12 +1,11 @@
 #!/bin/bash
-# Updated: Feb 15, 2026
-# Window A (Now): Feb 11 - Feb 18
-# Window B (Next Cycle): Feb 18 - Mar 4
+# Updated: Feb 17, 2026 for Dynamic Recurrence
+# Window A (Now): Feb 11 - Feb 18 | Window B (Next): Feb 18 - Mar 4
 
-echo "=== UPDATED HAPPY PATH (WITH FUTURE BILL) ==="
-# ... (intro text)
+echo "=== DYNAMIC RECURRENCE HAPPY PATH ==="
 
-# Added Bill 4: Rent - $1500 (Feb 20) -> This should now appear in Window B
+# We only provide the original bill definitions (Anchor Rules).
+# The engine now handles projecting instances into Window B.
 curl -X POST http://localhost:3000/api/forecast \
   -H "Content-Type: application/json" \
   -d '{
@@ -20,12 +19,9 @@ curl -X POST http://localhost:3000/api/forecast \
       {"id": 1, "name": "Internet", "amount": 55, "dueDate": "2026-02-02", "scheduleType": "monthly", "payRail": "AMEX"},
       {"id": 2, "name": "Electricity", "amount": 120, "dueDate": "2026-02-10", "scheduleType": "monthly", "payRail": "BANK"},
       {"id": 3, "name": "Phone", "amount": 40, "dueDate": "2026-02-16", "scheduleType": "monthly", "payRail": "BANK"},
-      {"id": 4, "name": "Rent", "amount": 1500, "dueDate": "2026-02-20", "scheduleType": "monthly", "payRail": "BANK"}
+      {"id": 4, "name": "Rent", "amount": 1500, "dueDate": "2026-01-20", "scheduleType": "monthly", "payRail": "BANK"}
     ],
     "commitments": [{"savingsAmount": 1100}],
     "baselines": [{"name": "groceries", "amount": 300}, {"name": "transport", "amount": 70}],
     "buffer": 50
   }' | jq '.'
-
-echo "Expected Math for Window B:"
-echo "Current Income (3704.32) - Fixed (1520) - Rent (1500) + CarryOver (2144.32) = \$2828.64"

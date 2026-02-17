@@ -199,7 +199,9 @@ export async function computeForecast(
     expenseBuffer;
 
   const splurgeNowB: number =
-    getSplurgeAmount(payAmount, totalAmountInWindowB) + splurgeNowA;
+    Math.round(
+      (getSplurgeAmount(payAmount, totalAmountInWindowB) + splurgeNowA) * 100,
+    ) / 100;
 
   const statusB: string = getSplurgeStatus(splurgeNowB);
 

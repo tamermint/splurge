@@ -67,8 +67,8 @@ export function getSplurgeAmount(
   const cleanWindowAmount: number = Math.round(totalWindowAmount * 100);
 
   // Calculate splurge in cents, then convert back to dollars
-  const splurgeAmountCents: number = cleanPayAmount - cleanWindowAmount;
-  return splurgeAmountCents / 100;
+  const splurgeAmountCents: number = (cleanPayAmount - cleanWindowAmount) / 100;
+  return splurgeAmountCents;
 }
 
 /**

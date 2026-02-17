@@ -441,7 +441,7 @@ describe("scheduleHelper", () => {
     it("should throw DateMappingError when bill has missing dueDate", () => {
       const startDate: Date = new Date("2026-01-15");
       const endDate: Date = new Date("2026-01-29");
-      const bills: Array<Partial<Bill>> = [
+      const bills = [
         {
           id: 1,
           name: "Internet",
@@ -450,7 +450,7 @@ describe("scheduleHelper", () => {
           scheduleType: "monthly",
           payRail: "AMEX",
         },
-      ];
+      ] as (Bill | FutureBill)[];
       expect(() => billsInWindow(bills, startDate, endDate)).toThrow(
         DateMappingError,
       );
@@ -460,7 +460,7 @@ describe("scheduleHelper", () => {
       // The implementation only checks if dueDate is falsy, not if it's a valid date
       const startDate: Date = new Date("2026-01-15");
       const endDate: Date = new Date("2026-01-29");
-      const bills: Array<Partial<Bill>> = [
+      const bills = [
         {
           id: 1,
           name: "Internet",
@@ -469,7 +469,7 @@ describe("scheduleHelper", () => {
           scheduleType: "monthly",
           payRail: "AMEX",
         },
-      ];
+      ] as (Bill | FutureBill)[];
       // Should not throw - the invalid Date will just be filtered out
       const result = billsInWindow(bills, startDate, endDate);
       expect(result.bills.length).toBe(0);
@@ -616,7 +616,7 @@ describe("scheduleHelper", () => {
     it("should throw DateMappingError when FutureBill has missing dueDate", () => {
       const startDate: Date = new Date("2026-01-15");
       const endDate: Date = new Date("2026-01-29");
-      const invalidFutureBills: Array<Partial<FutureBill>> = [
+      const invalidFutureBills = [
         {
           name: "Internet",
           amount: 55,
@@ -624,7 +624,7 @@ describe("scheduleHelper", () => {
           scheduleType: "monthly",
           payRail: "AMEX",
         },
-      ];
+      ] as (Bill | FutureBill)[];
       expect(() =>
         billsInWindow(invalidFutureBills, startDate, endDate),
       ).toThrow(DateMappingError);
