@@ -5,7 +5,6 @@ import {
 } from "@/domain/schedules/scheduleHelper";
 import type { PaySchedule, Bill, FutureBill } from "@/domain/types/forecast";
 import { DateMappingError, ValidationError } from "@/lib/errors";
-import "next/jest.js";
 
 describe("scheduleHelper", () => {
   describe("nextPayday", () => {

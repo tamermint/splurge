@@ -2,7 +2,6 @@ import {
   getSplurgeAmount,
   getSplurgeStatus,
 } from "@/domain/engine/calculateSplurge";
-import "next/jest.js";
 
 describe("splurgeCalculation", () => {
   it("should correctly calculate splurge amount", () => {

@@ -5,7 +5,6 @@ import {
   ForecastOutput,
 } from "@/domain/types/forecast";
 import { computeForecast } from "@/domain/engine/computeForecast";
-import "next/jest.js";
 
 describe("computeForecast - Magic Month Scenario", () => {
   /**

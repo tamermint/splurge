@@ -2,7 +2,7 @@ import {
   billsInWindow,
   nextPayday,
   nextPayDayAfter,
-} from "domain/schedules/scheduleHelper";
+} from "@/domain/schedules/scheduleHelper";
 import { getSplurgeStatus, getSplurgeAmount } from "./calculateSplurge";
 import {
   Baseline,

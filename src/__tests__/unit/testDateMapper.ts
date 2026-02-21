@@ -1,6 +1,5 @@
 import { Baseline, Commitment } from "@/domain/types/forecast";
 import { transformIntoDTO } from "@/app/api/forecast/datemapper";
-import "next/jest.js";
 
 describe("testDateMapper", () => {
   it("should correctly transform the dates in the input", () => {

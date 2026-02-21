@@ -1,7 +1,6 @@
 import { ValidationError, DateMappingError } from "@/lib/errors";
 import { recurrenceGenerator } from "@/domain/rules/recurrenceGenerator";
 import { Bill, FutureBill } from "@/domain/types/forecast";
-import "next/jest.js";
 
 describe("testRecurrenceGenerator", () => {
   it("should correctly return bills in horizon and current date", () => {
