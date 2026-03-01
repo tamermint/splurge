@@ -50,7 +50,7 @@ describe("testInflowGenerator", () => {
   });
   it("should throw validation error if frequency is invalid", () => {
     const paySchedule: PaySchedule = {
-      frequency: "" as any,
+      frequency: "" as unknown as "weekly" | "fortnightly" | "monthly",
       inflows: [],
     };
     const fromDate: Date = new Date("2026-03-05");
