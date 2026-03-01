@@ -1,10 +1,10 @@
-import { ValidationError } from "@/lib/errors";
 import {
   Baseline,
   Bill,
   Commitment,
   FutureBill,
   Inflow,
+  oneOffExpense,
   TimelineEvent,
 } from "../types/forecast";
 
@@ -13,6 +13,7 @@ export function timelineGenerator(
   windowBills: (Bill | FutureBill)[],
   commitments: Commitment[],
   baselines: Baseline[],
+  expenses: oneOffExpense[],
   buffer: number,
   startingBalance: number,
 ): TimelineEvent[] {
@@ -52,6 +53,19 @@ export function timelineGenerator(
         runningBalance: 0,
         liquidityStatus: "stable",
       });
+    });
+  });
+
+  //Map the one off expenses
+  expenses.forEach((expense) => {
+    timelineEvents.push({
+      timestamp: expense.date,
+      type: "expense",
+      label: expense.name,
+      amount: -expense.amount,
+      paymentConstraints: "soft",
+      runningBalance: 0,
+      liquidityStatus: "stable",
     });
   });
 

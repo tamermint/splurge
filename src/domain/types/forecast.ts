@@ -5,7 +5,7 @@ import { z } from "zod";
  */
 export const TimelineEventSchema = z.object({
   timestamp: z.coerce.date(),
-  type: z.enum(["inflow", "bill", "commitment", "baseline"]),
+  type: z.enum(["inflow", "bill", "commitment", "baseline", "expense"]),
   label: z.string(),
   amount: z.number(), //signed: -ve for outflows and +ve for inflows
   paymentConstraints: z.enum(["hard", "soft"]),
@@ -62,11 +62,19 @@ export const BaselineSchema = z.object({
 });
 export type Baseline = z.infer<typeof BaselineSchema>;
 
+export const oneOffExpenseSchema = z.object({
+  name: z.string(),
+  amount: z.number(),
+  date: z.coerce.date(),
+});
+export type oneOffExpense = z.infer<typeof oneOffExpenseSchema>;
+
 export const ForecastInputSchema = z.object({
   paySchedule: PayScheduleSchema,
   bills: z.array(BillSchema),
   commitments: z.array(CommitmentSchema),
   baselines: z.array(BaselineSchema),
+  expenses: z.optional(z.array(oneOffExpenseSchema)),
   buffer: z.number().default(50),
 });
 export type ForecastInput = z.infer<typeof ForecastInputSchema>;

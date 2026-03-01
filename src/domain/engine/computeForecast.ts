@@ -17,6 +17,7 @@ import {
   Inflow,
   InflowsInWindowResult,
   TimelineEvent,
+  oneOffExpense,
 } from "@/domain/types/forecast";
 import { ValidationError } from "@/lib/errors";
 import { z } from "zod";
@@ -81,7 +82,7 @@ export async function computeForecast(
   // Pay schedule defines frequency and upcoming pay dates
   // Bills, commitments, baselines are outflows
   // Buffer is an expense buffer which should not be exhausted
-  const { paySchedule, bills, commitments, baselines, buffer } =
+  const { paySchedule, bills, commitments, baselines, expenses, buffer } =
     validationResult.data;
   const frequency: string = paySchedule.frequency;
 
@@ -116,9 +117,9 @@ export async function computeForecast(
     followingPayDay,
   );
 
-  // ============================================================================
-  // STEP 6: Window A - Calculate bills due between today and next pay
-  // ============================================================================
+  // ==============================================================================
+  // STEP 6: Window A - Calculate bills and expenses due between today and next pay
+  // ==============================================================================
 
   const windowAResult: BillsInWindowResult = billsInWindow(
     allBills,
@@ -127,6 +128,9 @@ export async function computeForecast(
   );
   const allBillsInWindowA: (Bill | FutureBill)[] = windowAResult.bills;
   const totalBillAmountInWindowA: number = windowAResult.totalAmount;
+
+  const expensesInWindowA: oneOffExpense[] =
+    expenses?.filter((e) => e.date >= today && e.date < activePayDay) ?? [];
 
   // ============================================================================
   // STEP 7: Window A - Calculate inflows between today and next pay
@@ -147,6 +151,7 @@ export async function computeForecast(
     allBillsInWindowA,
     commitments,
     baselines,
+    expensesInWindowA,
     buffer,
     0,
   );
@@ -174,9 +179,9 @@ export async function computeForecast(
     carryOver: 0, // No balance carried from previous window
   };
 
-  // ============================================================================
-  // STEP 10: Window B - Calculate bills due between next pay and following pay
-  // ============================================================================
+  // ========================================================================================
+  // STEP 10: Window B - Calculate bills and expenses due between next pay and following pay
+  // ========================================================================================
 
   const windowBresult: BillsInWindowResult = billsInWindow(
     allBills,
@@ -185,6 +190,11 @@ export async function computeForecast(
   );
   const allBillsInWindowB: (Bill | FutureBill)[] = windowBresult.bills;
   const totalBillAmountInWindowB: number = windowBresult.totalAmount;
+
+  const expensesInWindowB: oneOffExpense[] =
+    expenses?.filter(
+      (e) => e.date >= activePayDay && e.date < followingPayDay,
+    ) ?? [];
 
   // ============================================================================
   // STEP 11: Window B - Calculate inflows between next pay and following pay day
@@ -205,6 +215,7 @@ export async function computeForecast(
     allBillsInWindowB,
     commitments,
     baselines,
+    expensesInWindowB,
     buffer,
     finalBalanceA,
   );
