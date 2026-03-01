@@ -11,6 +11,7 @@ describe("testRecurrenceGenerator", () => {
       dueDate: new Date("2026-02-21"),
       scheduleType: "monthly",
       payRail: "AMEX",
+      payType: "auto-debit",
     };
     const fromDate: Date = new Date("2026-02-18");
     const toDate: Date = new Date("2026-03-25");
@@ -21,6 +22,7 @@ describe("testRecurrenceGenerator", () => {
         dueDate: new Date("2026-02-21"),
         scheduleType: "monthly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
       {
         name: "Internet",
@@ -28,6 +30,7 @@ describe("testRecurrenceGenerator", () => {
         dueDate: new Date("2026-03-21"),
         scheduleType: "monthly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
     ];
     const actualFutureBills: FutureBill[] = recurrenceGenerator(
@@ -45,6 +48,7 @@ describe("testRecurrenceGenerator", () => {
       dueDate: new Date("2026-02-16"),
       scheduleType: "monthly",
       payRail: "AMEX",
+      payType: "auto-debit",
     };
     const fromDate: Date = new Date("2026-02-18");
     const toDate: Date = new Date("2026-05-25");
@@ -55,6 +59,7 @@ describe("testRecurrenceGenerator", () => {
         dueDate: new Date("2026-03-16"),
         scheduleType: "monthly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
       {
         name: "Internet",
@@ -62,6 +67,7 @@ describe("testRecurrenceGenerator", () => {
         dueDate: new Date("2026-04-16"),
         scheduleType: "monthly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
       {
         name: "Internet",
@@ -69,6 +75,7 @@ describe("testRecurrenceGenerator", () => {
         dueDate: new Date("2026-05-16"),
         scheduleType: "monthly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
     ];
     const actualFutureBills: FutureBill[] = recurrenceGenerator(
@@ -94,6 +101,7 @@ describe("testRecurrenceGenerator", () => {
       dueDate: new Date("2025-08-21"),
       scheduleType: "yearly",
       payRail: "AMEX",
+      payType: "auto-debit",
     };
     const fromDate: Date = new Date("2026-02-18");
     const toDate: Date = new Date("2029-08-25");
@@ -104,6 +112,7 @@ describe("testRecurrenceGenerator", () => {
         dueDate: new Date("2026-08-21"),
         scheduleType: "yearly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
       {
         name: "NRMA - Car Insurance",
@@ -111,6 +120,7 @@ describe("testRecurrenceGenerator", () => {
         dueDate: new Date("2027-08-21"),
         scheduleType: "yearly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
       {
         name: "NRMA - Car Insurance",
@@ -118,6 +128,7 @@ describe("testRecurrenceGenerator", () => {
         dueDate: new Date("2028-08-21"),
         scheduleType: "yearly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
       {
         name: "NRMA - Car Insurance",
@@ -125,6 +136,7 @@ describe("testRecurrenceGenerator", () => {
         dueDate: new Date("2029-08-21"),
         scheduleType: "yearly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
     ];
     const actualFutureBills: FutureBill[] = recurrenceGenerator(
@@ -142,11 +154,12 @@ describe("testRecurrenceGenerator", () => {
       dueDate: new Date(),
       scheduleType: "monthly",
       payRail: "Bank",
+      payType: "auto-debit",
     };
     const invalidDate = new Date("invalid");
     expect(() =>
       recurrenceGenerator(
-        { ...validBill, scheduleType: "" },
+        { ...validBill, scheduleType: "" } as unknown as Bill,
         new Date(),
         new Date(),
       ),

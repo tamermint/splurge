@@ -1,5 +1,6 @@
 import { ValidationError, DateMappingError } from "@/lib/errors";
 import { Bill, FutureBill } from "../types/forecast";
+import { nextUTCIntervalDate } from "../schedules/scheduleHelper";
 
 /**
  * Recurrence Generator Module
@@ -125,7 +126,7 @@ export function recurrenceGenerator(
 
   // Use the bill's due date as the anchor point for recurrence
   // This will be advanced by the schedule type to find all occurrences
-  const pointerDate: Date = new Date(bill.dueDate);
+  let pointerDate: Date = new Date(bill.dueDate);
   const scheduleType: string = bill.scheduleType;
   const futureBills: FutureBill[] = [];
 
@@ -168,20 +169,7 @@ export function recurrenceGenerator(
     }
 
     // Advance pointer by the appropriate schedule interval
-    // Each schedule type has different advancement logic
-    if (scheduleType == "fortnightly") {
-      // Advance by 14 days
-      // Using getUTCDate() + setDate() for UTC-aware arithmetic
-      pointerDate.setDate(pointerDate.getUTCDate() + 14);
-    } else if (scheduleType == "monthly") {
-      // Advance by one calendar month
-      // Handles month boundaries automatically (Jan 31 → Feb 28/29)
-      pointerDate.setMonth(pointerDate.getUTCMonth() + 1);
-    } else if (scheduleType == "yearly") {
-      // Advance by one calendar year
-      // Preserves day/month (e.g., Feb 29 in leap year → Feb 28 in non-leap)
-      pointerDate.setFullYear(pointerDate.getUTCFullYear() + 1);
-    }
+    pointerDate = nextUTCIntervalDate(pointerDate, scheduleType);
   }
 
   // ============================================================================

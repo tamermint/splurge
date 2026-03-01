@@ -1,24 +1,27 @@
 import {
   billsInWindow,
-  nextPayday,
+  nextUTCIntervalDate,
   nextPayDayAfter,
+  inFlowsInWindow,
 } from "@/domain/schedules/scheduleHelper";
-import { getSplurgeStatus, getSplurgeAmount } from "./calculateSplurge";
+import { getSplurgeStatus } from "./calculateSplurge";
+import { timelineGenerator } from "./timelineGenerator";
 import {
-  Baseline,
   Bill,
-  PaySchedule,
-  Commitment,
   ForecastInput,
   ForecastOutput,
   Breakdown,
   BillsInWindowResult,
   ForecastInputSchema,
   FutureBill,
+  Inflow,
+  InflowsInWindowResult,
+  TimelineEvent,
 } from "@/domain/types/forecast";
 import { ValidationError } from "@/lib/errors";
 import { z } from "zod";
 import { recurrenceGenerator } from "../rules/recurrenceGenerator";
+import { inflowGenerator } from "../rules/inflowGenerator";
 
 /**
  * Computes a dual-window forecast of safe-to-splurge amounts.
@@ -76,29 +79,11 @@ export async function computeForecast(
   // ============================================================================
 
   // Pay schedule defines frequency and upcoming pay dates
-  const paySchedule: PaySchedule = validationResult.data.paySchedule;
-  const frequency: string = validationResult.data.paySchedule.frequency;
-  const payAmount: number = validationResult.data.paySchedule.totalAmount;
-
-  // Bills include all scheduled outflows (rent, utilities, subscriptions, etc.)
-  const bills: Bill[] = validationResult.data.bills;
-
-  // Baselines are essential recurring expenses (groceries, transport, etc.)
-  const baselines: Baseline[] = validationResult.data.baselines;
-  let totalBaselineAmount: number = 0;
-  for (const baseline of baselines) {
-    totalBaselineAmount += baseline.amount;
-  }
-
-  // Commitments are protected savings or fixed allocations that cannot be splurged
-  const commitments: Commitment[] = validationResult.data.commitments;
-  let totalCommitmentAmount: number = 0;
-  for (const commitment of commitments) {
-    totalCommitmentAmount += commitment.savingsAmount;
-  }
-
-  // Buffer is a safety cushion to prevent overspending (default: $50)
-  const expenseBuffer: number = validationResult.data.buffer;
+  // Bills, commitments, baselines are outflows
+  // Buffer is an expense buffer which should not be exhausted
+  const { paySchedule, bills, commitments, baselines, buffer } =
+    validationResult.data;
+  const frequency: string = paySchedule.frequency;
 
   // ============================================================================
   // STEP 3: Calculate Forecast Windows
@@ -111,10 +96,10 @@ export async function computeForecast(
   // 2. Wait until next pay → Access larger splurge amount after upcoming bills
 
   const activePayDay: Date = nextPayDayAfter(today, paySchedule);
-  const followingPayDay: Date = nextPayday(activePayDay, frequency);
+  const followingPayDay: Date = nextUTCIntervalDate(activePayDay, frequency);
 
   // ============================================================================
-  // STEP 4: Calculate bills due between today and following pay day
+  // STEP 4: Calculate all bills due between today and following pay day
   // ============================================================================
 
   const allBills: FutureBill[] = bills.flatMap((bill) => {
@@ -122,7 +107,17 @@ export async function computeForecast(
   });
 
   // ============================================================================
-  // STEP 5: Window A - Calculate bills due between today and next pay
+  // STEP 5: Calculate all inflows due between today and following pay day
+  // ============================================================================
+
+  const allInflows: Inflow[] = inflowGenerator(
+    paySchedule,
+    today,
+    followingPayDay,
+  );
+
+  // ============================================================================
+  // STEP 6: Window A - Calculate bills due between today and next pay
   // ============================================================================
 
   const windowAResult: BillsInWindowResult = billsInWindow(
@@ -134,7 +129,53 @@ export async function computeForecast(
   const totalBillAmountInWindowA: number = windowAResult.totalAmount;
 
   // ============================================================================
-  // STEP 6: Window B - Calculate bills due between next pay and following pay
+  // STEP 7: Window A - Calculate inflows between today and next pay
+  // ============================================================================
+
+  const windowAInflows: InflowsInWindowResult = inFlowsInWindow(
+    allInflows,
+    today,
+    activePayDay,
+  );
+
+  // ============================================================================
+  // STEP 8: Window A - Generate Timeline and calculate splurge for window A
+  // ============================================================================
+
+  const timelineA: TimelineEvent[] = timelineGenerator(
+    windowAInflows.inflows,
+    allBillsInWindowA,
+    commitments,
+    baselines,
+    buffer,
+    0,
+  );
+
+  const finalBalanceA: number =
+    timelineA.length > 0 ? timelineA[timelineA.length - 1].runningBalance : 0;
+  const splurgeNowA = Math.round((finalBalanceA - buffer) * 100) / 100;
+
+  // ============================================================================
+  // STEP 9: Window A - Itemize window A
+  // ============================================================================
+
+  /**
+   * Breakdown for Window A
+   * This itemizes all components that reduce available splurge amount
+   */
+  const breakdownA: Breakdown = {
+    income: windowAInflows.totalAmount,
+    commitments: commitments,
+    baselines: baselines,
+    buffer: buffer,
+    totalBillAmount: totalBillAmountInWindowA,
+    allBills: allBillsInWindowA,
+    timeline: timelineA,
+    carryOver: 0, // No balance carried from previous window
+  };
+
+  // ============================================================================
+  // STEP 10: Window B - Calculate bills due between next pay and following pay
   // ============================================================================
 
   const windowBresult: BillsInWindowResult = billsInWindow(
@@ -146,64 +187,37 @@ export async function computeForecast(
   const totalBillAmountInWindowB: number = windowBresult.totalAmount;
 
   // ============================================================================
-  // STEP 7: Window A Forecast - Calculate safe-to-splurge NOW
+  // STEP 11: Window B - Calculate inflows between next pay and following pay day
   // ============================================================================
-  // Safe-to-Splurge Now = Income - (Bills + Commitments + Baselines + Buffer)
-  //
-  // This shows how much can be spent immediately while still covering:
-  // - Bills due before the next paycheck
-  // - Fixed savings commitments
-  // - Essential baseline expenses
-  // - Safety buffer
 
-  const totalAmountInWindowA: number =
-    totalBillAmountInWindowA +
-    totalCommitmentAmount +
-    totalBaselineAmount +
-    expenseBuffer;
-
-  const splurgeNowA: number = getSplurgeAmount(payAmount, totalAmountInWindowA);
-  const statusA: string = getSplurgeStatus(splurgeNowA);
-
-  /**
-   * Breakdown for Window A
-   * This itemizes all components that reduce available splurge amount
-   */
-  const breakdownA: Breakdown = {
-    income: payAmount,
-    commitments: commitments,
-    baselines: baselines,
-    buffer: expenseBuffer,
-    totalBillAmount: totalBillAmountInWindowA,
-    allBills: allBillsInWindowA,
-    carryOver: 0, // No balance carried from previous window
-  };
+  const windowBInflows: InflowsInWindowResult = inFlowsInWindow(
+    allInflows,
+    activePayDay,
+    followingPayDay,
+  );
 
   // ============================================================================
-  // STEP 8: Window B Forecast - Calculate safe-to-splurge IF YOU WAIT
+  // STEP 12: Window B - Generate Timeline and calculate splurge for window B
   // ============================================================================
-  // Safe-to-Splurge If Wait = (Income Window B - Bills B) + Splurge Now (carry-over)
-  //
-  // This shows the benefit of waiting until after the next paycheck to spend:
-  // - Upcoming bills in Window A are already paid with current paycheck
-  // - Money from Window A splurge can be accumulated
-  // - Bills in Window B are paid from the second paycheck
-  //
-  // The carry-over (splurgeNowA) represents unspent discretionary income that
-  // accumulates if the user chooses to defer spending
 
-  const totalAmountInWindowB: number =
-    totalBillAmountInWindowB +
-    totalCommitmentAmount +
-    totalBaselineAmount +
-    expenseBuffer;
+  const timelineB: TimelineEvent[] = timelineGenerator(
+    windowBInflows.inflows,
+    allBillsInWindowB,
+    commitments,
+    baselines,
+    buffer,
+    finalBalanceA,
+  );
 
-  const splurgeNowB: number =
-    Math.round(
-      (getSplurgeAmount(payAmount, totalAmountInWindowB) + splurgeNowA) * 100,
-    ) / 100;
+  const finalBalanceB: number =
+    timelineB.length > 0
+      ? timelineB[timelineB.length - 1].runningBalance
+      : finalBalanceA;
+  const splurgeNowB: number = Math.round((finalBalanceB - buffer) * 100) / 100;
 
-  const statusB: string = getSplurgeStatus(splurgeNowB);
+  // ============================================================================
+  // STEP 13: Window B - Itemize window B
+  // ============================================================================
 
   /**
    * Breakdown for Window B
@@ -211,17 +225,25 @@ export async function computeForecast(
    * that could be accumulated if the user waits
    */
   const breakdownB: Breakdown = {
-    income: payAmount,
+    income: windowBInflows.totalAmount,
     commitments: commitments,
     baselines: baselines,
-    buffer: expenseBuffer,
+    buffer: buffer,
     totalBillAmount: totalBillAmountInWindowB,
     allBills: allBillsInWindowB,
+    timeline: timelineB,
     carryOver: splurgeNowA, // Unspent amount from Window A
   };
 
   // ============================================================================
-  // STEP 8: Return Dual-Window Forecast Output
+  // STEP 14: Get splurge status for window A and window B
+  // ============================================================================
+
+  const statusA: string = getSplurgeStatus(splurgeNowA);
+  const statusB: string = getSplurgeStatus(splurgeNowB);
+
+  // ============================================================================
+  // STEP 15: Return Dual-Window Forecast Output
   // ============================================================================
   // Construct and return the complete forecast containing both scenarios
 

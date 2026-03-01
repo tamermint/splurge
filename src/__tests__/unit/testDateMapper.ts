@@ -5,10 +5,14 @@ describe("testDateMapper", () => {
   it("should correctly transform the dates in the input", () => {
     const forecastInput = {
       paySchedule: {
-        payDate: "2026-02-04",
         frequency: "fortnightly",
-        totalAmount: 3704.32,
-        optionalSplit: false,
+        inflows: [
+          {
+            amount: 3704.32,
+            date: "2026-02-04",
+            label: "Salary",
+          },
+        ],
       },
       bills: [
         {
@@ -18,6 +22,7 @@ describe("testDateMapper", () => {
           dueDate: "2026-02-02",
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 2,
@@ -26,6 +31,7 @@ describe("testDateMapper", () => {
           dueDate: "2026-02-10",
           scheduleType: "monthly",
           payRail: "BANK",
+          payType: "auto-debit",
         },
         {
           id: 3,
@@ -34,9 +40,10 @@ describe("testDateMapper", () => {
           dueDate: "2026-02-16",
           scheduleType: "monthly",
           payRail: "BANK",
+          payType: "auto-debit",
         },
       ],
-      commitments: [{ savingsAmount: 1100 }],
+      commitments: [{ commitmentType: "savings", commitmentAmount: 1100 }],
       baselines: [
         { name: "groceries", amount: 300 },
         { name: "transport", amount: 70 },
@@ -45,10 +52,14 @@ describe("testDateMapper", () => {
     };
     const transformedInput = transformIntoDTO(forecastInput as unknown);
     const payScheduleV2 = {
-      payDate: new Date("2026-02-04"),
       frequency: "fortnightly",
-      totalAmount: 3704.32,
-      optionalSplit: false,
+      inflows: [
+        {
+          amount: 3704.32,
+          date: new Date("2026-02-04"),
+          label: "Salary",
+        },
+      ],
     };
     const billsV2 = [
       {
@@ -58,6 +69,7 @@ describe("testDateMapper", () => {
         dueDate: new Date("2026-02-02"),
         scheduleType: "monthly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
       {
         id: 2,
@@ -66,6 +78,7 @@ describe("testDateMapper", () => {
         dueDate: new Date("2026-02-10"),
         scheduleType: "monthly",
         payRail: "BANK",
+        payType: "auto-debit",
       },
       {
         id: 3,
@@ -74,9 +87,12 @@ describe("testDateMapper", () => {
         dueDate: new Date("2026-02-16"),
         scheduleType: "monthly",
         payRail: "BANK",
+        payType: "auto-debit",
       },
     ];
-    const commitmentsV2: Commitment[] = [{ savingsAmount: 1100 }];
+    const commitmentsV2: Commitment[] = [
+      { commitmentType: "savings", commitmentAmount: 1100 },
+    ];
     const baselinesV2: Baseline[] = [
       { name: "groceries", amount: 300 },
       { name: "transport", amount: 70 },
@@ -89,11 +105,12 @@ describe("testDateMapper", () => {
       baselines: baselinesV2,
       buffer: bufferV2,
     };
-    expect(transformedInput.paySchedule.payDate).toBeInstanceOf(Date);
-    expect(transformedInput.paySchedule.payDate.toISOString()).toContain(
-      "2026-02-04",
-    );
-    expect(transformedInput.bills[0].dueDate).toBeInstanceOf(Date);
     expect(transformedInput).toEqual(expectedTransformedInput);
+    expect(transformedInput.paySchedule.inflows).toBeDefined();
+    expect(transformedInput.paySchedule.inflows[0].date).toBeInstanceOf(Date);
+    expect(
+      transformedInput.paySchedule.inflows[0].date.toISOString(),
+    ).toContain("2026-02-04");
+    expect(transformedInput.bills[0].dueDate).toBeInstanceOf(Date);
   });
 });

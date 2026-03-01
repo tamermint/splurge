@@ -4,6 +4,8 @@ import {
   FutureBill,
   PaySchedule,
   BillsInWindowResult,
+  Inflow,
+  InflowsInWindowResult,
 } from "../types/forecast";
 
 /**
@@ -59,7 +61,7 @@ import {
  * const nextMonthlyPay = nextPayday(new Date("2025-01-31"), "monthly");
  * // Returns 2025-02-28 (or 02-29 in leap years)
  */
-export function nextPayday(payDate: Date, frequency: string): Date {
+export function nextUTCIntervalDate(payDate: Date, frequency: string): Date {
   // Validate input date is valid
   if (isNaN(payDate.getTime())) {
     throw new DateMappingError("Invalid payDate!");
@@ -76,14 +78,17 @@ export function nextPayday(payDate: Date, frequency: string): Date {
   // Advance by the appropriate frequency
   if (frequency == "weekly") {
     // Weekly: Add 7 days
-    resultDate.setDate(resultDate.getDate() + 7);
+    resultDate.setUTCDate(resultDate.getUTCDate() + 7);
   } else if (frequency == "fortnightly") {
     // Fortnightly: Add 14 days
-    resultDate.setDate(resultDate.getDate() + 14);
+    resultDate.setUTCDate(resultDate.getUTCDate() + 14);
   } else if (frequency == "monthly") {
     // Monthly: Advance to same day of next month
     // Handles month boundaries automatically (e.g., Jan 31 → Feb 28)
-    resultDate.setMonth(resultDate.getMonth() + 1);
+    resultDate.setUTCMonth(resultDate.getUTCMonth() + 1);
+  } else if (frequency == "yearly") {
+    // Yearly: Advance to same day of next year
+    resultDate.setUTCFullYear(resultDate.getUTCFullYear() + 1);
   }
 
   return resultDate;
@@ -149,21 +154,65 @@ export function nextPayDayAfter(
   }
 
   // Validate paySchedule is provided and valid
-  if (!paySchedule) {
-    throw new ValidationError("Payschedule is invalid");
+  if (!paySchedule || !paySchedule.inflows || paySchedule.inflows.length == 0) {
+    throw new ValidationError("Payschedule must contain atleast one inflow");
   }
+  // Sort the inflows based on date
+  const sortedInflows: Inflow[] = [...paySchedule.inflows].sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  );
 
   // Start with the anchor pay date from the schedule
-  let payDate: Date = structuredClone(paySchedule.payDate);
+  let payDate: Date = structuredClone(sortedInflows[0].date);
   const frequency: string = paySchedule.frequency;
 
   // Advance until we find a pay date strictly after fromDate
   // Loop invariant: payDate is a valid pay date based on the schedule
   while (payDate <= fromDate) {
-    payDate = nextPayday(payDate, frequency);
+    payDate = nextUTCIntervalDate(payDate, frequency);
   }
 
   return payDate;
+}
+/**
+ * This function is essential to provide the data for the AI coach to anlayse the user's liquidity profile
+ * and gauge which bill needs to be paid by which inflow
+ *
+ * This function caters to salary packaging professionals whose pay is split between two days
+ *
+ *
+ * @param paySchedule The paySchedule from the user input containing the anchor date and frequency
+ * @param windowStart Reference date (typically today) to find the next pay from
+ * @param windowEnd The ending date to get all the inflows in window
+ * @returns An inflowsInWindow object containing all the inflows and the total amount
+ */
+
+export function inFlowsInWindow(
+  allInflows: Inflow[],
+  windowStart: Date,
+  windowEnd: Date,
+): InflowsInWindowResult {
+  //Check for Date format errors in input
+  if (isNaN(windowStart.getTime()) || isNaN(windowEnd.getTime())) {
+    throw new DateMappingError("Invalid window start or end dates");
+  }
+
+  //Check if the payschedule is a valid object or if it has 0 inflows
+  if (!allInflows || allInflows.length == 0) {
+    throw new ValidationError("There must be atleast one inflow");
+  }
+
+  const filteredInflows: Inflow[] = allInflows.filter(
+    (inflow) => inflow.date >= windowStart && inflow.date < windowEnd,
+  );
+  const total: number =
+    Math.round(
+      filteredInflows.reduce((sum, inflow) => sum + inflow.amount, 0) * 100,
+    ) / 100;
+  return {
+    inflows: filteredInflows,
+    totalAmount: total,
+  };
 }
 
 /**

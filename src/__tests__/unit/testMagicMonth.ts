@@ -10,19 +10,21 @@ describe("computeForecast - Magic Month Scenario", () => {
   /**
    * Scenario: May 2026 (Triple Pay Month)
    * Pay dates: May 1, May 15, May 29
-   * Reference Date (Today): April 30, 2026
-   * * This test validates that even when the calendar month is "lumpy,"
-   * the engine accurately segments the 14-day windows.
+   * Reference Date (Today): May 1, 2026 (Payday)
+   * * We set today to the payday so Window A covers the first cycle.
    */
   it("should handle a monthly bill correctly across a triple-pay cycle", async () => {
-    // Setting "Today" to just before the first payday of the magic month
-    const today = new Date("2026-04-30T00:00:00.000Z");
+    const today = new Date("2026-05-01T00:00:00.000Z");
 
     const paySchedule: PaySchedule = {
-      payDate: new Date("2026-05-01T00:00:00.000Z"),
       frequency: "fortnightly",
-      totalAmount: 3000,
-      optionalSplit: false,
+      inflows: [
+        {
+          amount: 3000,
+          date: new Date("2026-05-01T00:00:00.000Z"),
+          label: "Salary",
+        },
+      ],
     };
 
     const bills: Bill[] = [
@@ -33,55 +35,7 @@ describe("computeForecast - Magic Month Scenario", () => {
         dueDate: new Date("2026-05-05T00:00:00.000Z"),
         scheduleType: "monthly",
         payRail: "BANK",
-      },
-    ];
-
-    const forecastInput: ForecastInput = {
-      paySchedule,
-      bills,
-      commitments: [],
-      baselines: [],
-      buffer: 0, // Zero buffer for clean math validation
-    };
-
-    /**
-     * Logic Verification:
-     * Window A (Now): Apr 30 -> May 1. Bills: None.
-     * Window B (If Wait): May 1 -> May 15. Bills: Rent (May 5).
-     * * Even though May has 3 paychecks, Window B only looks at the
-     * first 14-day gap.
-     */
-    const result = await computeForecast(forecastInput, today);
-
-    // Window A: Income (3000) - Bills (0) = 3000
-    expect(result.now.safeToSplurge).toBe(3000);
-    expect(result.now.breakdown.allBills).toHaveLength(0);
-
-    // Window B: (Income 3000 - Bills 2000) + CarryOver 3000 = 4000
-    expect(result.ifWait.safeToSplurge).toBe(4000);
-    expect(result.ifWait.breakdown.allBills).toHaveLength(1);
-    expect(result.ifWait.breakdown.allBills[0].name).toBe("Rent");
-  });
-
-  it("should ensure monthly bills aren't double-counted during payday shifts", async () => {
-    // Advancing the clock to the middle of the magic month
-    const midMonthToday = new Date("2026-05-14T00:00:00.000Z");
-
-    const paySchedule: PaySchedule = {
-      payDate: new Date("2026-05-15T00:00:00.000Z"),
-      frequency: "fortnightly",
-      totalAmount: 3000,
-      optionalSplit: false,
-    };
-
-    const bills: Bill[] = [
-      {
-        id: 101,
-        name: "Rent",
-        amount: 2000,
-        dueDate: new Date("2026-05-05T00:00:00.000Z"), // Already paid in previous window
-        scheduleType: "monthly",
-        payRail: "BANK",
+        payType: "auto-debit",
       },
     ];
 
@@ -93,30 +47,89 @@ describe("computeForecast - Magic Month Scenario", () => {
       buffer: 0,
     };
 
-    const result = await computeForecast(forecastInput, midMonthToday);
+    // Explicitly use the ForecastOutput type here
+    const result: ForecastOutput = await computeForecast(forecastInput, today);
+    console.log(result);
 
     /**
-     * Window A: May 14 -> May 15.
+     * Logic Verification (Event Sequencing):
+     * Window A: May 1 -> May 15.
+     * - Inflow: May 1 ($3000)
+     * - Bill: Rent May 5 (-$2000)
+     * - Final Balance: $1000
      * Window B: May 15 -> May 29.
-     * * The May 5th Rent bill should NOT appear in either window because the
-     * recurrence generator starts from 'Today'.
+     * - Starting Bal: $1000
+     * - Inflow: May 15 ($3000)
+     * - Final Balance: $4000
+     */
+    expect(result.now.safeToSplurge).toBe(1000);
+    expect(result.now.breakdown.timeline).toHaveLength(2); // Inflow + Bill
+
+    expect(result.ifWait.safeToSplurge).toBe(4000);
+    expect(result.ifWait.breakdown.allBills).toHaveLength(0); // No bills in 2nd fortnight
+    expect(result.ifWait.breakdown.timeline[0].type).toBe("inflow");
+  });
+
+  it("should ensure monthly bills aren't double-counted during payday shifts", async () => {
+    // Today is the day before the second payday
+    const midMonthToday = new Date("2026-05-14T00:00:00.000Z");
+
+    const paySchedule: PaySchedule = {
+      frequency: "fortnightly",
+      inflows: [
+        {
+          amount: 3000,
+          date: new Date("2026-05-01T00:00:00.000Z"), // Anchor in past
+          label: "Salary",
+        },
+      ],
+    };
+
+    const bills: Bill[] = [
+      {
+        id: 101,
+        name: "Rent",
+        amount: 2000,
+        dueDate: new Date("2026-05-05T00:00:00.000Z"), // Already paid
+        scheduleType: "monthly",
+        payRail: "BANK",
+        payType: "auto-debit",
+      },
+    ];
+
+    const result: ForecastOutput = await computeForecast(
+      {
+        ...paySchedule,
+        paySchedule,
+        bills,
+        commitments: [],
+        baselines: [],
+        buffer: 0,
+      } as ForecastInput,
+      midMonthToday,
+    );
+
+    /**
+     * Window A: May 14 -> May 15. (Liquidity is 0 as simulation starts at 0)
+     * Window B: May 15 -> May 29. (Includes the May 15 Payday)
      */
     expect(result.now.breakdown.allBills).toHaveLength(0);
     expect(result.ifWait.breakdown.allBills).toHaveLength(0);
-    expect(result.ifWait.safeToSplurge).toBe(6000); // 3000 (Now) + 3000 (Wait)
+    expect(result.ifWait.safeToSplurge).toBe(3000);
   });
-  it("should correctly project and capture a yearly bill falling in a magic month window", async () => {
-    /**
-     * Today is the start of the Magic Month.
-     * We have a large Yearly bill with an anchor in the previous year.
-     */
+
+  it("should correctly project a yearly bill anchor from 2025 into a 2026 window", async () => {
     const today = new Date("2026-05-01T00:00:00.000Z");
 
     const paySchedule: PaySchedule = {
-      payDate: new Date("2026-05-01T00:00:00.000Z"),
       frequency: "fortnightly",
-      totalAmount: 3000,
-      optionalSplit: false,
+      inflows: [
+        {
+          amount: 3000,
+          date: new Date("2026-05-01T00:00:00.000Z"),
+          label: "Salary",
+        },
+      ],
     };
 
     const bills: Bill[] = [
@@ -124,40 +137,32 @@ describe("computeForecast - Magic Month Scenario", () => {
         id: 202,
         name: "Car Insurance",
         amount: 1200,
-        dueDate: new Date("2025-05-20T00:00:00.000Z"), // Anchor from last year
+        dueDate: new Date("2025-05-20T00:00:00.000Z"), // 2025 Anchor
         scheduleType: "yearly",
         payRail: "AMEX",
+        payType: "auto-debit",
       },
     ];
 
-    const forecastInput: ForecastInput = {
-      paySchedule,
-      bills,
-      commitments: [],
-      baselines: [],
-      buffer: 50, // Buffer for safety
-    };
+    const result: ForecastOutput = await computeForecast(
+      {
+        paySchedule,
+        bills,
+        commitments: [],
+        baselines: [],
+        buffer: 50,
+      },
+      today,
+    );
 
-    const result = await computeForecast(forecastInput, today);
-
-    /**
-     * Logic Check:
-     * Window A (Now): May 1 -> May 15.
-     * Window B (If Wait): May 15 -> May 29.
-     * * The Yearly bill (May 20) MUST land in Window B.
-     * If the generator fails to project from 2025 to 2026, safeToSplurge will be dangerously high.
-     */
-
-    // Window A: Income (3000) - Buffer (50) = 2950
+    // Window A: [May 1, May 15). Payday included. Buffer subtracted.
     expect(result.now.safeToSplurge).toBe(2950);
-    expect(result.now.breakdown.allBills).toHaveLength(0);
 
-    // Window B: (Income 3000 - Bill 1200 - Buffer 50) + CarryOver 2950 = 4700
-    expect(result.ifWait.safeToSplurge).toBe(4700);
+    // Window B: [May 15, May 29). Includes Year 2026 instance of Insurance.
     expect(result.ifWait.breakdown.allBills).toHaveLength(1);
-    expect(result.ifWait.breakdown.allBills[0].name).toBe("Car Insurance");
-    expect(result.ifWait.breakdown.allBills[0].dueDate.toISOString()).toContain(
-      "2026-05-20",
-    ); // Projected correctly
+    expect(result.ifWait.breakdown.allBills[0].dueDate.getUTCFullYear()).toBe(
+      2026,
+    );
+    expect(result.ifWait.safeToSplurge).toBe(4750); // (3000 - 50) + (3000 - 1200)
   });
 });

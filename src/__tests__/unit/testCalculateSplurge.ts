@@ -61,4 +61,15 @@ describe("splurgeCalculation", () => {
     const expectedSplurgeStatus: string = "amber";
     expect(actualSplurgeStatus).toBe(expectedSplurgeStatus);
   });
+  it("should correctly return the splurge status as frugal", () => {
+    const payAmount: number = 3100.5;
+    const totalWindowAmount: number = 3075.25;
+    const splurgeAmount: number = getSplurgeAmount(
+      payAmount,
+      totalWindowAmount,
+    );
+    const actualSplurgeStatus: string = getSplurgeStatus(splurgeAmount);
+    const expectedSplurgeStatus: string = "frugal";
+    expect(actualSplurgeStatus).toBe(expectedSplurgeStatus);
+  });
 });

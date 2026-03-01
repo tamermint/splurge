@@ -1,5 +1,5 @@
 import {
-  nextPayday,
+  nextUTCIntervalDate,
   billsInWindow,
   nextPayDayAfter,
 } from "@/domain/schedules/scheduleHelper";
@@ -7,12 +7,12 @@ import type { PaySchedule, Bill, FutureBill } from "@/domain/types/forecast";
 import { DateMappingError, ValidationError } from "@/lib/errors";
 
 describe("scheduleHelper", () => {
-  describe("nextPayday", () => {
+  describe("nextUTCIntervalDate", () => {
     it("should add 7 days when frequency is weekly", () => {
       const baseDate = new Date("2026-01-20");
       const newDate = new Date("2026-01-27");
       const frequency = "weekly";
-      const result: Date = nextPayday(baseDate, frequency);
+      const result: Date = nextUTCIntervalDate(baseDate, frequency);
       expect(result.toDateString().slice(0, 10)).toBe(
         newDate.toDateString().slice(0, 10),
       );
@@ -21,7 +21,7 @@ describe("scheduleHelper", () => {
       const baseDate = new Date("2026-01-20");
       const newDate = new Date("2026-02-03");
       const frequency = "fortnightly";
-      const result: Date = nextPayday(baseDate, frequency);
+      const result: Date = nextUTCIntervalDate(baseDate, frequency);
       expect(result.toDateString().slice(0, 10)).toBe(
         newDate.toDateString().slice(0, 10),
       );
@@ -30,7 +30,7 @@ describe("scheduleHelper", () => {
       const baseDate = new Date("2026-01-20");
       const newDate = new Date("2026-02-20");
       const frequency = "monthly";
-      const result: Date = nextPayday(baseDate, frequency);
+      const result: Date = nextUTCIntervalDate(baseDate, frequency);
       expect(result.toDateString().slice(0, 10)).toBe(
         newDate.toDateString().slice(0, 10),
       );
@@ -38,32 +38,34 @@ describe("scheduleHelper", () => {
     it("should throw DateMappingError when payDate is invalid", () => {
       const invalidDate = new Date("invalid");
       const frequency = "weekly";
-      expect(() => nextPayday(invalidDate, frequency)).toThrow(
+      expect(() => nextUTCIntervalDate(invalidDate, frequency)).toThrow(
         DateMappingError,
       );
     });
     it("should throw ValidationError when frequency is empty string", () => {
       const baseDate = new Date("2026-01-20");
       const frequency = "";
-      expect(() => nextPayday(baseDate, frequency)).toThrow(ValidationError);
+      expect(() => nextUTCIntervalDate(baseDate, frequency)).toThrow(
+        ValidationError,
+      );
     });
     it("should throw ValidationError when frequency is null", () => {
       const baseDate = new Date("2026-01-20");
       const nullFrequency = null as unknown as string;
-      expect(() => nextPayday(baseDate, nullFrequency)).toThrow(
+      expect(() => nextUTCIntervalDate(baseDate, nullFrequency)).toThrow(
         ValidationError,
       );
     });
     it("should throw ValidationError when frequency is not a string", () => {
       const baseDate = new Date("2026-01-20");
       const numberFrequency = 123 as unknown as string;
-      expect(() => nextPayday(baseDate, numberFrequency)).toThrow(
+      expect(() => nextUTCIntervalDate(baseDate, numberFrequency)).toThrow(
         ValidationError,
       );
     });
     it("should handle monthly frequency at month boundaries (Jan 31 → Mar 3)", () => {
       const baseDate = new Date("2026-01-31");
-      const result: Date = nextPayday(baseDate, "monthly");
+      const result: Date = nextUTCIntervalDate(baseDate, "monthly");
       // JavaScript setMonth() rolls over: Jan 31 + 1 month = Mar 3 (Feb 31 doesn't exist)
       expect(result.getDate()).toBe(3);
       expect(result.getMonth()).toBe(2); // March
@@ -73,10 +75,14 @@ describe("scheduleHelper", () => {
     it("should return the next payday when fromDate is before payDate", () => {
       const fromDate = new Date("2026-01-15");
       const paySchedule: PaySchedule = {
-        payDate: new Date("2026-01-20"),
         frequency: "weekly",
-        totalAmount: 2000,
-        optionalSplit: false,
+        inflows: [
+          {
+            amount: 2000,
+            date: new Date("2026-01-20"),
+            label: "Salary",
+          },
+        ],
       };
       const result = nextPayDayAfter(fromDate, paySchedule);
       expect(result.toDateString().slice(0, 10)).toBe(
@@ -86,10 +92,14 @@ describe("scheduleHelper", () => {
     it("should skip to next occurrence when fromDate is after payDate", () => {
       const fromDate = new Date("2026-01-25");
       const paySchedule: PaySchedule = {
-        payDate: new Date("2026-01-20"),
         frequency: "weekly",
-        totalAmount: 2000,
-        optionalSplit: false,
+        inflows: [
+          {
+            amount: 2000,
+            date: new Date("2026-01-20"),
+            label: "Salary",
+          },
+        ],
       };
       const result = nextPayDayAfter(fromDate, paySchedule);
       expect(result.toDateString().slice(0, 10)).toBe(
@@ -99,10 +109,14 @@ describe("scheduleHelper", () => {
     it("should skip to next occurrence when fromDate equals payDate", () => {
       const fromDate = new Date("2026-01-20");
       const paySchedule: PaySchedule = {
-        payDate: new Date("2026-01-20"),
         frequency: "fortnightly",
-        totalAmount: 2000,
-        optionalSplit: false,
+        inflows: [
+          {
+            amount: 2000,
+            date: new Date("2026-01-20"),
+            label: "Salary",
+          },
+        ],
       };
       const result = nextPayDayAfter(fromDate, paySchedule);
       expect(result.toDateString().slice(0, 10)).toBe(
@@ -112,10 +126,14 @@ describe("scheduleHelper", () => {
     it("should throw DateMappingError when fromDate is invalid", () => {
       const invalidDate = new Date("invalid");
       const paySchedule: PaySchedule = {
-        payDate: new Date("2026-01-20"),
         frequency: "weekly",
-        totalAmount: 2000,
-        optionalSplit: false,
+        inflows: [
+          {
+            amount: 2000,
+            date: new Date("2026-01-20"),
+            label: "Salary",
+          },
+        ],
       };
       expect(() => nextPayDayAfter(invalidDate, paySchedule)).toThrow(
         DateMappingError,
@@ -148,6 +166,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-02"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       const result = billsInWindow(bills, startDate, endDate);
@@ -167,6 +186,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-27"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       const bills: Bill[] = [
@@ -177,6 +197,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-27"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 2,
@@ -185,6 +206,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-28"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 54,
@@ -193,6 +215,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-31"),
           scheduleType: "fortnightly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
         {
           id: 27,
@@ -201,6 +224,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-10"),
           scheduleType: "fortnightly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       const result = billsInWindow(bills, startDate, endDate);
@@ -219,6 +243,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-02"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       const bills: Bill[] = [
@@ -229,6 +254,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-02"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 2,
@@ -237,6 +263,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-18"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 54,
@@ -245,6 +272,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-06"),
           scheduleType: "fortnightly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
         {
           id: 27,
@@ -253,6 +281,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-10"),
           scheduleType: "fortnightly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       const result = billsInWindow(bills, startDate, endDate);
@@ -271,6 +300,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-02"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 2,
@@ -279,6 +309,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-17"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 54,
@@ -287,6 +318,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-06"),
           scheduleType: "fortnightly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
         {
           id: 27,
@@ -295,6 +327,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-10"),
           scheduleType: "fortnightly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       const bills: Bill[] = [
@@ -305,6 +338,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-02"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 2,
@@ -313,6 +347,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-17"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 54,
@@ -321,6 +356,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-06"),
           scheduleType: "fortnightly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
         {
           id: 27,
@@ -329,6 +365,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-10"),
           scheduleType: "fortnightly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       const result = billsInWindow(bills, startDate, endDate);
@@ -347,6 +384,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-20"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       const bills: Bill[] = [
@@ -357,6 +395,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-20"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 2,
@@ -365,6 +404,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-18"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           id: 54,
@@ -373,6 +413,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-06"),
           scheduleType: "fortnightly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
         {
           id: 27,
@@ -381,6 +422,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-10"),
           scheduleType: "fortnightly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       const result = billsInWindow(bills, startDate, endDate);
@@ -414,6 +456,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-20"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       expect(() => billsInWindow(bills, startDate, endDate)).toThrow(
@@ -431,6 +474,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-20"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ];
       expect(() => billsInWindow(bills, startDate, endDate)).toThrow(
@@ -448,6 +492,7 @@ describe("scheduleHelper", () => {
           // dueDate is missing
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ] as (Bill | FutureBill)[];
       expect(() => billsInWindow(bills, startDate, endDate)).toThrow(
@@ -467,6 +512,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("invalid"), // This is a Date object with NaN
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ] as (Bill | FutureBill)[];
       // Should not throw - the invalid Date will just be filtered out
@@ -488,6 +534,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-27"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           name: "Insurance",
@@ -495,6 +542,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-28"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
         {
           name: "Gym membership",
@@ -502,6 +550,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-31"),
           scheduleType: "fortnightly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
       ];
       const result = billsInWindow(futureBills, startDate, endDate);
@@ -521,6 +570,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-02"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         } as Bill,
         {
           name: "Water Bill",
@@ -528,6 +578,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-01-25"),
           scheduleType: "monthly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         } as FutureBill,
         {
           id: 2,
@@ -536,6 +587,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-18"),
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         } as Bill,
         {
           name: "Gym membership",
@@ -543,6 +595,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-06"),
           scheduleType: "fortnightly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         } as FutureBill,
       ];
       const result = billsInWindow(mixedBills, startDate, endDate);
@@ -567,6 +620,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-02"),
           scheduleType: "monthly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
         {
           name: "Electric",
@@ -574,6 +628,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-20"),
           scheduleType: "monthly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
         {
           name: "Internet",
@@ -581,6 +636,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-03-05"),
           scheduleType: "monthly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
       ];
 
@@ -622,6 +678,7 @@ describe("scheduleHelper", () => {
           // dueDate is missing
           scheduleType: "monthly",
           payRail: "AMEX",
+          payType: "auto-debit",
         },
       ] as (Bill | FutureBill)[];
       expect(() =>
@@ -639,6 +696,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-01"),
           scheduleType: "monthly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
       ];
       const result = billsInWindow(futureBills, startDate, endDate);
@@ -656,6 +714,7 @@ describe("scheduleHelper", () => {
           dueDate: new Date("2026-02-28"),
           scheduleType: "monthly",
           payRail: "Bank Account",
+          payType: "auto-debit",
         },
       ];
       const result = billsInWindow(futureBills, startDate, endDate);
