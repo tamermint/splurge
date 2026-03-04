@@ -48,6 +48,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Step 6.5 Approve protobufjs for serialization
+      - name: Approve build
+        run: pnpm approve-builds
+
       # Step 7: Lint - Quality gate check
       - name: Lint
         run: pnpm lint
@@ -90,4 +94,8 @@ jobs:
         run: |
           bash src/__tests__/scenarios/test-forecast-happypath.sh
           bash src/__tests__/scenarios/test-forecast-insolvent.sh
+          bash src/__tests__/scenarios/test-forecast-splitpay-happypath.sh
+          bash src/__tests__/scenarios/test-forecast-splitpay-insolvent.sh
+          bash src/__tests__/scenarios/test-insights-insolvent.sh
+
         shell: bash

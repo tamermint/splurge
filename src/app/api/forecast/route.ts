@@ -1,16 +1,15 @@
-"use server";
-
+import { NextResponse } from "next/server";
 import { computeForecast } from "domain/engine/computeForecast";
 import { transformIntoDTO } from "./datemapper";
 import { ValidationError } from "@/lib/errors";
 
-export async function POST(request: Request): Promise<Response> {
+export async function POST(request: Request): Promise<NextResponse> {
   try {
     const today: Date = new Date();
     const input = await request.json();
     const transformedInput = transformIntoDTO(input);
     const forecastOutput = await computeForecast(transformedInput, today);
-    return Response.json({ success: true, data: forecastOutput });
+    return NextResponse.json({ success: true, data: forecastOutput });
   } catch (error: unknown) {
     let status = 500;
     let type = "system_error";
@@ -22,6 +21,9 @@ export async function POST(request: Request): Promise<Response> {
     } else if (error instanceof Error) {
       message = error.message;
     }
-    return Response.json({ success: false, error: message, type }, { status });
+    return NextResponse.json(
+      { success: false, error: message, type },
+      { status },
+    );
   }
 }
