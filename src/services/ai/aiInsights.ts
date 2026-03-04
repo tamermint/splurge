@@ -2,15 +2,19 @@ import { GoogleGenAI } from "@google/genai";
 import { ForecastOutput } from "@/domain/types/forecast";
 import fs from "fs";
 import path from "path";
-import { ForecastError } from "@/lib/errors";
-
-const client = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+import { ForecastError, ValidationError } from "@/lib/errors";
 
 export async function generateSplurgeInsights(
   forecast: ForecastOutput,
 ): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new ValidationError("AI API key is not defined in the environment");
+  }
+
+  const client = new GoogleGenAI({ apiKey });
+
   const promptPath = path.join(
     process.cwd(),
     "src/services/ai/system-prompt.md",

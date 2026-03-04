@@ -48,10 +48,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Step 6.5 Approve protobufjs for serialization
-      - name: Approve build
-        run: pnpm approve-builds
-
       # Step 7: Lint - Quality gate check
       - name: Lint
         run: pnpm lint
@@ -67,6 +63,8 @@ jobs:
       # Step 10: Build - Ultimate sanity check
       - name: Build
         run: pnpm build
+        env:
+          GEMINI_API_KEY: ${{'build_dummy_key'}}
 
       # Step 11: Start the server
       - name: Start production server
