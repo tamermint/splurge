@@ -49,7 +49,6 @@ describe("computeForecast - Magic Month Scenario", () => {
 
     // Explicitly use the ForecastOutput type here
     const result: ForecastOutput = await computeForecast(forecastInput, today);
-    console.log(result);
 
     /**
      * Logic Verification (Event Sequencing):

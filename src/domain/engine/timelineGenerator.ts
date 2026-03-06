@@ -7,6 +7,7 @@ import {
   oneOffExpense,
   TimelineEvent,
 } from "../types/forecast";
+import { createHash } from "crypto";
 
 export function timelineGenerator(
   windowInflows: Inflow[],
@@ -22,6 +23,11 @@ export function timelineGenerator(
   //First get the inflows and then immediately attach the baselines and commitment for the "Savings First" principle
   windowInflows.forEach((inflow) => {
     timelineEvents.push({
+      id: createHash("sha256")
+        .update(
+          `${inflow.date}-${inflow.amount}-${inflow.label.toLowerCase().replace(/\s+/g, "")}`,
+        )
+        .digest("hex"),
       timestamp: inflow.date,
       type: "inflow",
       label: inflow.label,
@@ -33,6 +39,11 @@ export function timelineGenerator(
 
     commitments.forEach((commitment) => {
       timelineEvents.push({
+        id: createHash("sha256")
+          .update(
+            `${commitment.commitmentType.toLowerCase().replace(/\s+/g, "")}-${inflow.date}-${inflow.amount}`,
+          )
+          .digest("hex"),
         timestamp: inflow.date,
         type: "commitment",
         label: commitment.commitmentType,
@@ -45,6 +56,11 @@ export function timelineGenerator(
 
     baselines.forEach((baseline) => {
       timelineEvents.push({
+        id: createHash("sha256")
+          .update(
+            `${baseline.name.toLowerCase().replace(/\s+/g, "")}-${inflow.date}-${inflow.amount}`,
+          )
+          .digest("hex"),
         timestamp: inflow.date,
         type: "baseline",
         label: baseline.name,
@@ -59,6 +75,11 @@ export function timelineGenerator(
   //Map the one off expenses
   expenses.forEach((expense) => {
     timelineEvents.push({
+      id: createHash("sha256")
+        .update(
+          `${expense.date}-${expense.amount}-${expense.name.toLowerCase().replace(/\s+/g, "")}`,
+        )
+        .digest("hex"),
       timestamp: expense.date,
       type: "expense",
       label: expense.name,
@@ -72,6 +93,11 @@ export function timelineGenerator(
   //Map the bills
   windowBills.forEach((bill) => {
     timelineEvents.push({
+      id: createHash("sha256")
+        .update(
+          `${bill.dueDate}-${bill.amount}-${bill.name.toLowerCase().replace(/\s+/g, "")}`,
+        )
+        .digest("hex"),
       timestamp: bill.dueDate,
       type: "bill",
       label: bill.name,

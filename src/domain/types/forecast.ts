@@ -4,6 +4,7 @@ import { z } from "zod";
  * Timelive event represents a change in the state of the user's account
  */
 export const TimelineEventSchema = z.object({
+  id: z.string(),
   timestamp: z.coerce.date(),
   type: z.enum(["inflow", "bill", "commitment", "baseline", "expense"]),
   label: z.string(),
@@ -13,6 +14,17 @@ export const TimelineEventSchema = z.object({
   liquidityStatus: z.enum(["stable", "warning", "critical"]),
 });
 export type TimelineEvent = z.infer<typeof TimelineEventSchema>;
+
+export const SavingsReliefSchema = z.object({
+  targetEventId: z.string(),
+  targetLabel: z.string(),
+  reliefAmount: z.number(),
+  remainingCommitment: z.number(),
+  predictedBalance: z.number(),
+  isFullyResolved: z.boolean(),
+});
+
+export type SavingsRelief = z.infer<typeof SavingsReliefSchema>;
 
 export const Inflow = z.object({
   amount: z.number(),
@@ -102,6 +114,7 @@ export const ForecastOutputSchema = z.object({
     status: z.string(),
     breakdown: BreakdownSchema,
   }),
+  suggestedRelief: z.optional(SavingsReliefSchema),
 });
 export type ForecastOutput = z.infer<typeof ForecastOutputSchema>;
 

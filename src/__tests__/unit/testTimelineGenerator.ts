@@ -7,6 +7,7 @@ import {
   oneOffExpense,
   TimelineEvent,
 } from "@/domain/types/forecast";
+import { createHash } from "crypto";
 
 describe("Test timeline generator", () => {
   it("should accurately generate the timeline of events", () => {
@@ -82,6 +83,9 @@ describe("Test timeline generator", () => {
     );
     const expectedResult: TimelineEvent[] = [
       {
+        id: createHash("sha256")
+          .update(`${new Date("2026-02-18")}-${3000.54}-${"salary"}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-18"),
         type: "inflow",
         label: "Salary",
@@ -91,6 +95,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "stable",
       },
       {
+        id: createHash("sha256")
+          .update(`${"housesupport"}-${new Date("2026-02-18")}-${3000.54}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-18"),
         type: "commitment",
         label: "house support",
@@ -100,6 +107,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "stable",
       },
       {
+        id: createHash("sha256")
+          .update(`${"health"}-${new Date("2026-02-18")}-${3000.54}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-18"),
         type: "baseline",
         label: "Health",
@@ -109,6 +119,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "stable",
       },
       {
+        id: createHash("sha256")
+          .update(`${"savings"}-${new Date("2026-02-18")}-${3000.54}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-18"),
         type: "baseline",
         label: "Savings",
@@ -118,6 +131,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "stable",
       },
       {
+        id: createHash("sha256")
+          .update(`${"loan"}-${new Date("2026-02-18")}-${3000.54}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-18"),
         type: "commitment",
         label: "loan",
@@ -127,6 +143,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "stable",
       },
       {
+        id: createHash("sha256")
+          .update(`${new Date("2026-02-19")}-${690.45}-${"packagedsalary"}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-19"),
         type: "inflow",
         label: "Packaged Salary",
@@ -136,6 +155,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "stable",
       },
       {
+        id: createHash("sha256")
+          .update(`${"housesupport"}-${new Date("2026-02-19")}-${690.45}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-19"),
         type: "commitment",
         label: "house support",
@@ -145,6 +167,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "stable",
       },
       {
+        id: createHash("sha256")
+          .update(`${"health"}-${new Date("2026-02-19")}-${690.45}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-19"),
         type: "baseline",
         label: "Health",
@@ -154,6 +179,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "stable",
       },
       {
+        id: createHash("sha256")
+          .update(`${"savings"}-${new Date("2026-02-19")}-${690.45}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-19"),
         type: "baseline",
         label: "Savings",
@@ -163,6 +191,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "stable",
       },
       {
+        id: createHash("sha256")
+          .update(`${"loan"}-${new Date("2026-02-19")}-${690.45}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-19"),
         type: "commitment",
         label: "loan",
@@ -172,6 +203,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "stable",
       },
       {
+        id: createHash("sha256")
+          .update(`${new Date("2026-02-25")}-${1500}-${"carrepair"}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-25"),
         type: "expense",
         label: "Car repair",
@@ -181,6 +215,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "critical",
       },
       {
+        id: createHash("sha256")
+          .update(`${new Date("2026-02-27")}-${34.78}-${"myfitnesspassport"}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-27"),
         type: "bill",
         label: "My Fitness Passport",
@@ -190,6 +227,9 @@ describe("Test timeline generator", () => {
         liquidityStatus: "critical",
       },
       {
+        id: createHash("sha256")
+          .update(`${new Date("2026-02-28")}-${162.76}-${"healthinsurance"}`)
+          .digest("hex"),
         timestamp: new Date("2026-02-28"),
         type: "bill",
         label: "Health Insurance",
