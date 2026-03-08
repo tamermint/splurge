@@ -60,7 +60,12 @@ describe("computeForecast", () => {
     ];
 
     const commitments: Commitment[] = [
-      { commitmentType: "savings", commitmentAmount: 1100 },
+      {
+        commitmentType: "savings",
+        commitmentAmount: 1100,
+        constraint: "soft",
+        priority: 1,
+      },
     ];
     const baselines: Baseline[] = [
       { name: "groceries", amount: 300 },
