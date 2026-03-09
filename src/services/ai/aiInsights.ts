@@ -22,9 +22,10 @@ export async function generateSplurgeInsights(
   const systemInstructions = fs.readFileSync(promptPath, "utf-8");
   try {
     const result = await client.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemInstructions,
+        temperature: 0.1,
       },
       contents: [
         {

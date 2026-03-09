@@ -18,11 +18,13 @@ import {
   InflowsInWindowResult,
   TimelineEvent,
   oneOffExpense,
+  SavingsRelief,
 } from "@/domain/types/forecast";
 import { ValidationError } from "@/lib/errors";
 import { z } from "zod";
 import { recurrenceGenerator } from "../rules/recurrenceGenerator";
 import { inflowGenerator } from "../rules/inflowGenerator";
+import { calculateSavingsRelief } from "./calculateSavingsRelief";
 
 /**
  * Computes a dual-window forecast of safe-to-splurge amounts.
@@ -254,9 +256,22 @@ export async function computeForecast(
   const statusB: string = getSplurgeStatus(splurgeNowB);
 
   // ============================================================================
-  // STEP 15: Return Dual-Window Forecast Output
+  // STEP 15: Calculate the savings relief plan for both windows
   // ============================================================================
-  // Construct and return the complete forecast containing both scenarios
+
+  const globalTimeline: TimelineEvent[] = [...timelineA, ...timelineB];
+  const sortedGlobalTimeline: TimelineEvent[] = globalTimeline.sort(
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+  );
+  const savingsRelief: SavingsRelief | null = calculateSavingsRelief(
+    sortedGlobalTimeline,
+    buffer,
+  );
+
+  // ============================================================================
+  // STEP 16: Return Dual-Window Forecast Output And Savings Relief Plan
+  // ============================================================================
+  // Construct and return the complete forecast containing both scenarios and the savings relief
 
   return {
     now: {
@@ -269,5 +284,6 @@ export async function computeForecast(
       status: statusB,
       breakdown: breakdownB,
     },
+    suggestedRelief: savingsRelief,
   };
 }

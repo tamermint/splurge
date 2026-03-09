@@ -48,7 +48,8 @@ export function timelineGenerator(
         type: "commitment",
         label: commitment.commitmentType,
         amount: -commitment.commitmentAmount,
-        paymentConstraints: "soft",
+        paymentConstraints: commitment.constraint,
+        priority: commitment.priority,
         runningBalance: 0,
         liquidityStatus: "stable",
       });
