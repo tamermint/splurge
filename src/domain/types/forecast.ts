@@ -81,6 +81,14 @@ export const oneOffExpenseSchema = z.object({
 });
 export type oneOffExpense = z.infer<typeof oneOffExpenseSchema>;
 
+export const splurgeStatusSchema = z.enum([
+  "green",
+  "amber",
+  "frugal",
+  "critical",
+]);
+export type splurgeStatus = z.infer<typeof splurgeStatusSchema>;
+
 export const ForecastInputSchema = z.object({
   paySchedule: PayScheduleSchema,
   bills: z.array(BillSchema),
@@ -114,7 +122,7 @@ export const ForecastOutputSchema = z.object({
     status: z.string(),
     breakdown: BreakdownSchema,
   }),
-  suggestedRelief: z.optional(SavingsReliefSchema),
+  suggestedRelief: z.optional(SavingsReliefSchema).nullable(),
 });
 export type ForecastOutput = z.infer<typeof ForecastOutputSchema>;
 

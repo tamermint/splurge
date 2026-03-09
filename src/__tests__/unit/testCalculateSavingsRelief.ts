@@ -1,5 +1,4 @@
 import { TimelineEvent } from "@/domain/types/forecast";
-import { SavingsRelief } from "@/domain/types/forecast";
 import { calculateSavingsRelief } from "@/domain/engine/calculateSavingsRelief";
 import { ValidationError } from "@/lib/errors";
 
@@ -34,15 +33,15 @@ describe("calculateSavingsRelief", () => {
     });
 
     it("should throw ValidationError when timeline events is null", () => {
-      expect(() => calculateSavingsRelief(null as any, 50)).toThrow(
-        ValidationError,
-      );
+      expect(() =>
+        calculateSavingsRelief(null as unknown as TimelineEvent[], 50),
+      ).toThrow(ValidationError);
     });
 
     it("should throw ValidationError when timeline events is undefined", () => {
-      expect(() => calculateSavingsRelief(undefined as any, 50)).toThrow(
-        ValidationError,
-      );
+      expect(() =>
+        calculateSavingsRelief(undefined as unknown as TimelineEvent[], 50),
+      ).toThrow(ValidationError);
     });
   });
 

@@ -17,7 +17,7 @@ curl -s -X POST http://localhost:3000/api/forecast \
       { "id": 1, "name": "Surprise Repair", "amount": 1600, "dueDate": "2026-03-11", "scheduleType": "monthly", "payRail": "BANK", "payType": "manual" }
     ],
     "commitments": [
-      { "commitmentType": "Savings Lock", "commitmentAmount": 800 }
+      { "commitmentType": "Savings Lock", "commitmentAmount": 800, constraint: "soft", priority: 1 }
     ],
     "baselines": [
       { "name": "Living Expenses", "amount": 200 }

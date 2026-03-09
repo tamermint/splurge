@@ -27,6 +27,8 @@ curl -X POST http://localhost:3000/api/forecast \
       {
         "commitmentType": "Long-term Savings",
         "commitmentAmount": 1100
+        "constraint": "soft"
+        "priority": 1
       }
     ],
     "baselines": [

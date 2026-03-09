@@ -26,6 +26,8 @@ curl -X POST http://localhost:3000/api/forecast \
       {
         "commitmentType": "Aggressive Savings Lock",
         "commitmentAmount": 3500
+        "constraint": "hard",
+        "priority": 1
       }
     ],
     "baselines": [
