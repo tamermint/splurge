@@ -31,7 +31,8 @@ export async function generateSplurgeInsights(
       config: {
         systemInstruction: systemInstructions,
         temperature: 0.0,
-        topP: 1,
+        topP: 0,
+        topK: 1,
       },
       contents: [
         {
