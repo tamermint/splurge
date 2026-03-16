@@ -22,10 +22,13 @@ curl -X POST http://localhost:3000/api/forecast \
       {"id": 3, "name": "Phone", "amount": 40, "dueDate": "2026-02-16", "scheduleType": "monthly", "payRail": "BANK", "payType": "auto-debit"},
       {"id": 4, "name": "Gym", "amount": 50, "dueDate": "2026-01-25", "scheduleType": "monthly", "payRail": "BANK", "payType": "auto-debit"}
     ],
+    "expenses": [],
     "commitments": [
       {
         "commitmentType": "Aggressive Savings Lock",
-        "commitmentAmount": 3500
+        "commitmentAmount": 3500,
+        "constraint": "hard",
+        "priority": 1
       }
     ],
     "baselines": [

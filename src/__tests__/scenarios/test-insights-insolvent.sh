@@ -9,15 +9,14 @@ curl -s -X POST http://localhost:3000/api/forecast \
     "paySchedule": {
       "frequency": "fortnightly",
       "inflows": [
-        { "amount": 2500, "date": "2026-03-11", "label": "Primary Salary" },
-        { "amount": 600, "date": "2026-03-12", "label": "Packaged Pay" }
+        { "amount": 2500, "date": "2026-03-20", "label": "Primary Salary" }
       ]
     },
     "bills": [
-      { "id": 1, "name": "Surprise Repair", "amount": 1600, "dueDate": "2026-03-11", "scheduleType": "monthly", "payRail": "BANK", "payType": "manual" }
+      { "id": 1, "name": "Surprise Repair", "amount": 2600, "dueDate": "2026-03-22", "scheduleType": "monthly", "payRail": "BANK", "payType": "manual" }
     ],
     "commitments": [
-      { "commitmentType": "Savings Lock", "commitmentAmount": 800 }
+      { "commitmentType": "Emergency fund", "commitmentAmount": 500, "constraint": "soft", "priority": 1 }
     ],
     "baselines": [
       { "name": "Living Expenses", "amount": 200 }
@@ -25,6 +24,8 @@ curl -s -X POST http://localhost:3000/api/forecast \
     "expenses": [],
     "buffer": 50
   }' > temp_forecast.json
+
+
 
 echo "=== STEP 2: REQUESTING AI STRATEGIC ANALYSIS ==="
 

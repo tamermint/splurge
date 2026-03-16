@@ -1,8 +1,85 @@
+import { ValidationError } from "@/lib/errors";
 import { TimelineEvent } from "../types/forecast";
-//iterate through the timeline
-//find the point where the running balance becomes negative or is minimum
-//check if it is greater than or equal to buffer, if yes, return null
-//if no, then gather all events that led up to this minevent and have the type commitment
-//pick the most largest commitment
-//reliefAMount = abs(minEvent.runningBalance) + buffer
-//if reliefAMount > targetCommitment.amount, reliefAMount = targetCommitment.amount
+import { SavingsRelief, ReliefAction } from "../types/forecast";
+
+export function calculateSavingsRelief(
+  timelineEvents: TimelineEvent[],
+  buffer: number,
+): SavingsRelief | null {
+  if (!timelineEvents || timelineEvents.length == 0) {
+    throw new ValidationError("There must be atleast one timeline event");
+  }
+
+  //first, we find the event with the lowest running balance in the entire timeline
+  const minEvent: TimelineEvent = timelineEvents.reduce((min, e) =>
+    e.runningBalance < min.runningBalance ? e : min,
+  );
+
+  const minEventBalanceInCents: number = Math.round(
+    minEvent.runningBalance * 100,
+  );
+  const bufferInCents: number = Math.round(buffer * 100);
+
+  //if the lowest running balance is equal to or greater than buffer, return an empty object
+  if (minEventBalanceInCents >= bufferInCents) return null;
+
+  //this is how much is needed to recover from the min event
+  //so, if running balance in minEvent is -500, we need 550 to recover
+  const reliefGapInCents: number =
+    Math.abs(minEventBalanceInCents) + bufferInCents;
+
+  //get all commitments till the global min event
+  const allSoftCommitmentEventsTillMinEvent: TimelineEvent[] =
+    timelineEvents.filter(
+      (i) =>
+        i.type === "commitment" &&
+        i.paymentConstraints === "soft" &&
+        i.timestamp <= minEvent.timestamp,
+    );
+
+  if (allSoftCommitmentEventsTillMinEvent.length == 0) return null;
+
+  //sort all the soft commitments
+  const sortedSoftCommitments: TimelineEvent[] =
+    allSoftCommitmentEventsTillMinEvent.sort(
+      (a, b) => (b.priority ?? 0) - (a.priority ?? 0),
+    );
+
+  const actions: ReliefAction[] = [];
+  let remainingGapInCents: number = reliefGapInCents;
+
+  for (const commitment of sortedSoftCommitments) {
+    if (remainingGapInCents <= 0) break;
+
+    const availableCents: number = Math.round(
+      Math.abs(commitment.amount) * 100,
+    );
+    const takeCents: number = Math.min(availableCents, remainingGapInCents);
+
+    actions.push({
+      targetEventId: commitment.id,
+      label: commitment.label,
+      amountUnlocked: takeCents / 100,
+      remainingCommitment: (availableCents - takeCents) / 100,
+    });
+
+    remainingGapInCents -= takeCents;
+  }
+  const totalReliefAmountInCents: number = actions.reduce(
+    (sum, action) => sum + Math.round(action.amountUnlocked * 100),
+    0,
+  );
+  const predictedBalance: number =
+    (minEventBalanceInCents + totalReliefAmountInCents) / 100;
+
+  const isFullyResolved: boolean = totalReliefAmountInCents >= reliefGapInCents;
+
+  const savingsRelief: SavingsRelief = {
+    actions: actions,
+    totalReliefAmount: totalReliefAmountInCents / 100,
+    predictedBalance: predictedBalance,
+    isFullyResolved: isFullyResolved,
+  };
+
+  return savingsRelief;
+}

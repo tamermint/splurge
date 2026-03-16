@@ -1,8 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
-import { ForecastOutput } from "@/domain/types/forecast";
+import { ForecastOutput, TrimmedForecastOutput } from "@/domain/types/forecast";
 import fs from "fs";
 import path from "path";
 import { ForecastError, ValidationError } from "@/lib/errors";
+import { trimForecastOutputForAI } from "./forecastOutputTrimmer";
 
 export async function generateSplurgeInsights(
   forecast: ForecastOutput,
@@ -15,22 +16,30 @@ export async function generateSplurgeInsights(
 
   const client = new GoogleGenAI({ apiKey });
 
+  const trimmedForecastOutput: TrimmedForecastOutput =
+    trimForecastOutputForAI(forecast);
+
   const promptPath = path.join(
     process.cwd(),
     "src/services/ai/system-prompt.md",
   );
+
   const systemInstructions = fs.readFileSync(promptPath, "utf-8");
   try {
     const result = await client.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.5-pro",
       config: {
         systemInstruction: systemInstructions,
+        temperature: 0.0,
+        topP: 1,
       },
       contents: [
         {
           role: "user",
           parts: [
-            { text: `Analyze this sequence: ${JSON.stringify(forecast)}` },
+            {
+              text: `Analyze this sequence: ${JSON.stringify(trimmedForecastOutput)}`,
+            },
           ],
         },
       ],

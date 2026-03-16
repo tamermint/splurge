@@ -43,7 +43,14 @@ describe("testDateMapper", () => {
           payType: "auto-debit",
         },
       ],
-      commitments: [{ commitmentType: "savings", commitmentAmount: 1100 }],
+      commitments: [
+        {
+          commitmentType: "savings",
+          commitmentAmount: 1100,
+          constraint: "soft",
+          priority: 1,
+        },
+      ],
       baselines: [
         { name: "groceries", amount: 300 },
         { name: "transport", amount: 70 },
@@ -91,7 +98,12 @@ describe("testDateMapper", () => {
       },
     ];
     const commitmentsV2: Commitment[] = [
-      { commitmentType: "savings", commitmentAmount: 1100 },
+      {
+        commitmentType: "savings",
+        commitmentAmount: 1100,
+        constraint: "soft",
+        priority: 1,
+      },
     ];
     const baselinesV2: Baseline[] = [
       { name: "groceries", amount: 300 },

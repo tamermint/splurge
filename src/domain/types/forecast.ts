@@ -6,20 +6,37 @@ import { z } from "zod";
 export const TimelineEventSchema = z.object({
   id: z.string(),
   timestamp: z.coerce.date(),
-  type: z.enum(["inflow", "bill", "commitment", "baseline", "expense"]),
+  type: z.literal(["inflow", "bill", "commitment", "baseline", "expense"]),
   label: z.string(),
   amount: z.number(), //signed: -ve for outflows and +ve for inflows
-  paymentConstraints: z.enum(["hard", "soft"]),
+  paymentConstraints: z.literal(["hard", "soft"]),
+  priority: z.optional(z.number()),
   runningBalance: z.number(),
-  liquidityStatus: z.enum(["stable", "warning", "critical"]),
+  liquidityStatus: z.literal(["stable", "warning", "critical"]),
 });
 export type TimelineEvent = z.infer<typeof TimelineEventSchema>;
 
-export const SavingsReliefSchema = z.object({
+export const SimpleTimelineSchema = z.object({
+  date: z.string(),
+  label: TimelineEventSchema.shape.label,
+  type: z.string(),
+  amount: TimelineEventSchema.shape.amount,
+  balance: z.number(),
+  status: z.string(),
+});
+export type SimpleTimeline = z.infer<typeof SimpleTimelineSchema>;
+
+export const reliefActionSchema = z.object({
   targetEventId: z.string(),
-  targetLabel: z.string(),
-  reliefAmount: z.number(),
+  label: z.string(),
+  amountUnlocked: z.number(),
   remainingCommitment: z.number(),
+});
+export type ReliefAction = z.infer<typeof reliefActionSchema>;
+
+export const SavingsReliefSchema = z.object({
+  actions: z.array(reliefActionSchema),
+  totalReliefAmount: z.number(),
   predictedBalance: z.number(),
   isFullyResolved: z.boolean(),
 });
@@ -34,11 +51,7 @@ export const Inflow = z.object({
 export type Inflow = z.infer<typeof Inflow>;
 
 export const PayScheduleSchema = z.object({
-  frequency: z.union([
-    z.literal("weekly"),
-    z.literal("fortnightly"),
-    z.literal("monthly"),
-  ]),
+  frequency: z.literal(["weekly", "fortnightly", "monthly"]),
   inflows: z.array(Inflow),
 });
 export type PaySchedule = z.infer<typeof PayScheduleSchema>;
@@ -48,14 +61,9 @@ export const BillSchema = z.object({
   name: z.string(),
   amount: z.number(),
   dueDate: z.coerce.date(),
-  scheduleType: z.union([
-    z.literal("weekly"),
-    z.literal("fortnightly"),
-    z.literal("monthly"),
-    z.literal("yearly"),
-  ]),
+  scheduleType: z.literal(["weekly", "fortnightly", "monthly", "yearly"]),
   payRail: z.string(),
-  payType: z.union([z.literal("auto-debit"), z.literal("manual")]),
+  payType: z.literal(["auto-debit", "manual"]),
 });
 export type Bill = z.infer<typeof BillSchema>;
 
@@ -65,6 +73,8 @@ export type FutureBill = z.infer<typeof FutureBillSchema>;
 export const CommitmentSchema = z.object({
   commitmentType: z.string(),
   commitmentAmount: z.number(),
+  constraint: z.literal(["hard", "soft"]),
+  priority: z.number(),
 });
 export type Commitment = z.infer<typeof CommitmentSchema>;
 
@@ -80,6 +90,14 @@ export const oneOffExpenseSchema = z.object({
   date: z.coerce.date(),
 });
 export type oneOffExpense = z.infer<typeof oneOffExpenseSchema>;
+
+export const splurgeStatusSchema = z.enum([
+  "green",
+  "amber",
+  "frugal",
+  "critical",
+]);
+export type splurgeStatus = z.infer<typeof splurgeStatusSchema>;
 
 export const ForecastInputSchema = z.object({
   paySchedule: PayScheduleSchema,
@@ -103,6 +121,13 @@ export const BreakdownSchema = z.object({
 });
 export type Breakdown = z.infer<typeof BreakdownSchema>;
 
+export const SimpleBreakdownSchema = BreakdownSchema.omit({
+  timeline: true,
+}).extend({
+  timeline: z.array(SimpleTimelineSchema),
+});
+export type SimpleBreakdown = z.infer<typeof SimpleBreakdownSchema>;
+
 export const ForecastOutputSchema = z.object({
   now: z.object({
     safeToSplurge: z.number(),
@@ -114,9 +139,19 @@ export const ForecastOutputSchema = z.object({
     status: z.string(),
     breakdown: BreakdownSchema,
   }),
-  suggestedRelief: z.optional(SavingsReliefSchema),
+  suggestedRelief: z.optional(SavingsReliefSchema).nullable(),
 });
 export type ForecastOutput = z.infer<typeof ForecastOutputSchema>;
+
+export const TrimmedForecastOutputSchema = ForecastOutputSchema.extend({
+  now: ForecastOutputSchema.shape.now.extend({
+    breakdown: SimpleBreakdownSchema,
+  }),
+  ifWait: ForecastOutputSchema.shape.ifWait.extend({
+    breakdown: SimpleBreakdownSchema,
+  }),
+});
+export type TrimmedForecastOutput = z.infer<typeof TrimmedForecastOutputSchema>;
 
 export const BillsInWindowResultSchema = z.object({
   bills: z.array(z.union([BillSchema, FutureBillSchema])),

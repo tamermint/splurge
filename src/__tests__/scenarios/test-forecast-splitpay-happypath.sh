@@ -17,8 +17,11 @@ curl -X POST http://localhost:3000/api/forecast \
     "bills": [
       { "id": 1, "name": "Rent", "amount": 1500, "dueDate": "2026-02-13", "scheduleType": "monthly", "payRail": "BANK", "payType": "auto-debit" }
     ],
+    "expenses": [],
     "commitments": [
-      { "commitmentType": "Savings Goal", "commitmentAmount": 800 }
+      { "commitmentType": "Savings Goal", "commitmentAmount": 800, "constraint": "soft", "priority": 1 },
+      { "commitmentType": "Savings Goal", "commitmentAmount": 800, "constraint": "soft", "priority": 1 },
+      { "commitmentType": "Loan", "commitmentAmount": 600, "constraint": "soft", "priority": 2 }
     ],
     "baselines": [
       { "name": "Living Expenses", "amount": 200 }

@@ -1,75 +1,58 @@
-import {
-  getSplurgeAmount,
-  getSplurgeStatus,
-} from "@/domain/engine/calculateSplurge";
+import { getSplurgeStatus } from "@/domain/engine/calculateSplurge";
+import { ValidationError } from "@/lib/errors";
 
-describe("splurgeCalculation", () => {
-  it("should correctly calculate splurge amount", () => {
-    const payAmount: number = 3052.74;
-    const totalWindowAmount: number = 2154.75;
-    const expectedOutput: number =
-      Math.round((payAmount - totalWindowAmount) * 100) / 100;
-    const actualOutput = getSplurgeAmount(payAmount, totalWindowAmount);
-    expect(expectedOutput).toBe(actualOutput);
-  });
-  it("should handle negative splurge amount", () => {
-    const payAmount: number = 3052.74;
-    const totalWindowAmount: number = 4000.45;
-    const expectedOutput: number =
-      Math.round((payAmount - totalWindowAmount) * 100) / 100;
-    const actualOutput = getSplurgeAmount(payAmount, totalWindowAmount);
-    expect(expectedOutput).toBe(actualOutput);
-  });
-  it("should handle negative three places decimal", () => {
-    const payAmount: number = 3052.746;
-    const totalWindowAmount: number = 4000.455;
-    const expectedOutput: number =
-      Math.round((payAmount - totalWindowAmount) * 100) / 100;
-    const actualOutput = getSplurgeAmount(payAmount, totalWindowAmount);
-    expect(expectedOutput).toBe(actualOutput);
-  });
-  it("should correctly return the splurge status as insolvent", () => {
-    const payAmount: number = 3052.746;
-    const totalWindowAmount: number = 4000.455;
-    const splurgeAmount: number = getSplurgeAmount(
-      payAmount,
-      totalWindowAmount,
-    );
+describe("getSplurgeStatus", () => {
+  it("should return 'green' when splurge amount is >= $100", () => {
+    const splurgeAmount: number = 500;
     const actualSplurgeStatus: string = getSplurgeStatus(splurgeAmount);
-    const expectedSplurgeStatus: string = "insolvent";
-    expect(actualSplurgeStatus).toBe(expectedSplurgeStatus);
+    expect(actualSplurgeStatus).toBe("green");
   });
-  it("should correctly return the splurge status as green", () => {
-    const payAmount: number = 4000.455;
-    const totalWindowAmount: number = 3092.79;
-    const splurgeAmount: number = getSplurgeAmount(
-      payAmount,
-      totalWindowAmount,
-    );
+
+  it("should return 'green' at the green threshold of exactly $100", () => {
+    const splurgeAmount: number = 100;
     const actualSplurgeStatus: string = getSplurgeStatus(splurgeAmount);
-    const expectedSplurgeStatus: string = "green";
-    expect(actualSplurgeStatus).toBe(expectedSplurgeStatus);
+    expect(actualSplurgeStatus).toBe("green");
   });
-  it("should correctly return the splurge status as amber", () => {
-    const payAmount: number = 4000.455;
-    const totalWindowAmount: number = 3942.746;
-    const splurgeAmount: number = getSplurgeAmount(
-      payAmount,
-      totalWindowAmount,
-    );
+
+  it("should return 'amber' when splurge amount is between $50-$99", () => {
+    const splurgeAmount: number = 75;
     const actualSplurgeStatus: string = getSplurgeStatus(splurgeAmount);
-    const expectedSplurgeStatus: string = "amber";
-    expect(actualSplurgeStatus).toBe(expectedSplurgeStatus);
+    expect(actualSplurgeStatus).toBe("amber");
   });
-  it("should correctly return the splurge status as frugal", () => {
-    const payAmount: number = 3100.5;
-    const totalWindowAmount: number = 3075.25;
-    const splurgeAmount: number = getSplurgeAmount(
-      payAmount,
-      totalWindowAmount,
-    );
+
+  it("should return 'amber' at the amber threshold of exactly $50", () => {
+    const splurgeAmount: number = 50;
     const actualSplurgeStatus: string = getSplurgeStatus(splurgeAmount);
-    const expectedSplurgeStatus: string = "frugal";
-    expect(actualSplurgeStatus).toBe(expectedSplurgeStatus);
+    expect(actualSplurgeStatus).toBe("amber");
+  });
+
+  it("should return 'frugal' when splurge amount is between $0-$49", () => {
+    const splurgeAmount: number = 25;
+    const actualSplurgeStatus: string = getSplurgeStatus(splurgeAmount);
+    expect(actualSplurgeStatus).toBe("frugal");
+  });
+
+  it("should return 'frugal' at break-even of exactly $0", () => {
+    const splurgeAmount: number = 0;
+    const actualSplurgeStatus: string = getSplurgeStatus(splurgeAmount);
+    expect(actualSplurgeStatus).toBe("frugal");
+  });
+
+  it("should return 'critical' when splurge amount is negative", () => {
+    const splurgeAmount: number = -100;
+    const actualSplurgeStatus: string = getSplurgeStatus(splurgeAmount);
+    expect(actualSplurgeStatus).toBe("critical");
+  });
+
+  it("should handle negative decimal amounts", () => {
+    const splurgeAmount: number = -947.91;
+    const actualSplurgeStatus: string = getSplurgeStatus(splurgeAmount);
+    expect(actualSplurgeStatus).toBe("critical");
+  });
+
+  it("should throw ValidationError when splurge amount is not a number", () => {
+    expect(() => {
+      getSplurgeStatus(NaN);
+    }).toThrow(ValidationError);
   });
 });
