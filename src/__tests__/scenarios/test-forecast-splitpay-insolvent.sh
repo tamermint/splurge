@@ -15,10 +15,14 @@ curl -X POST http://localhost:3000/api/forecast \
       ]
     },
     "bills": [
-      { "id": 1, "name": "Surprise Repair", "amount": 1600, "dueDate": "2026-02-11", "scheduleType": "monthly", "payRail": "BANK", "payType": "manual" }
+      { "id": 1, "name": "Rent", "amount": 1500, "dueDate": "2026-02-13", "scheduleType": "monthly", "payRail": "BANK", "payType": "auto-debit" }
+    ],
+    "expenses": [
+      { "name": "Surprise Repair", "amount": 1200, "date": "2026-02-11" }
     ],
     "commitments": [
-      { "commitmentType": "Savings Lock", "commitmentAmount": 800, "constraint": "soft", "priority": 1 }
+      { "commitmentType": "Savings Lock", "commitmentAmount": 800, "constraint": "soft", "priority": 1 },
+      { "commitmentType": "Savings Lock", "commitmentAmount": 500, "constraint": "soft", "priority": 1 }
     ],
     "baselines": [
       { "name": "Living Expenses", "amount": 200 }

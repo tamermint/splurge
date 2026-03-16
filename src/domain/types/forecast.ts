@@ -16,6 +16,16 @@ export const TimelineEventSchema = z.object({
 });
 export type TimelineEvent = z.infer<typeof TimelineEventSchema>;
 
+export const SimpleTimelineSchema = z.object({
+  date: z.string(),
+  label: TimelineEventSchema.shape.label,
+  type: z.string(),
+  amount: TimelineEventSchema.shape.amount,
+  balance: z.number(),
+  status: z.string(),
+});
+export type SimpleTimeline = z.infer<typeof SimpleTimelineSchema>;
+
 export const reliefActionSchema = z.object({
   targetEventId: z.string(),
   label: z.string(),
@@ -111,6 +121,13 @@ export const BreakdownSchema = z.object({
 });
 export type Breakdown = z.infer<typeof BreakdownSchema>;
 
+export const SimpleBreakdownSchema = BreakdownSchema.omit({
+  timeline: true,
+}).extend({
+  timeline: z.array(SimpleTimelineSchema),
+});
+export type SimpleBreakdown = z.infer<typeof SimpleBreakdownSchema>;
+
 export const ForecastOutputSchema = z.object({
   now: z.object({
     safeToSplurge: z.number(),
@@ -125,6 +142,16 @@ export const ForecastOutputSchema = z.object({
   suggestedRelief: z.optional(SavingsReliefSchema).nullable(),
 });
 export type ForecastOutput = z.infer<typeof ForecastOutputSchema>;
+
+export const TrimmedForecastOutputSchema = ForecastOutputSchema.extend({
+  now: ForecastOutputSchema.shape.now.extend({
+    breakdown: SimpleBreakdownSchema,
+  }),
+  ifWait: ForecastOutputSchema.shape.ifWait.extend({
+    breakdown: SimpleBreakdownSchema,
+  }),
+});
+export type TrimmedForecastOutput = z.infer<typeof TrimmedForecastOutputSchema>;
 
 export const BillsInWindowResultSchema = z.object({
   bills: z.array(z.union([BillSchema, FutureBillSchema])),

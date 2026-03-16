@@ -14,12 +14,19 @@ export function calculateSavingsRelief(
   const minEvent: TimelineEvent = timelineEvents.reduce((min, e) =>
     e.runningBalance < min.runningBalance ? e : min,
   );
+
+  const minEventBalanceInCents: number = Math.round(
+    minEvent.runningBalance * 100,
+  );
+  const bufferInCents: number = Math.round(buffer * 100);
+
   //if the lowest running balance is equal to or greater than buffer, return an empty object
-  if (minEvent.runningBalance >= buffer) return null;
+  if (minEventBalanceInCents >= bufferInCents) return null;
 
   //this is how much is needed to recover from the min event
   //so, if running balance in minEvent is -500, we need 550 to recover
-  const reliefGap: number = Math.abs(minEvent.runningBalance) + buffer;
+  const reliefGapInCents: number =
+    Math.abs(minEventBalanceInCents) + bufferInCents;
 
   //get all commitments till the global min event
   const allSoftCommitmentEventsTillMinEvent: TimelineEvent[] =
@@ -29,6 +36,7 @@ export function calculateSavingsRelief(
         i.paymentConstraints === "soft" &&
         i.timestamp <= minEvent.timestamp,
     );
+
   if (allSoftCommitmentEventsTillMinEvent.length == 0) return null;
 
   //sort all the soft commitments
@@ -38,35 +46,37 @@ export function calculateSavingsRelief(
     );
 
   const actions: ReliefAction[] = [];
-  let remainingGap: number = reliefGap;
+  let remainingGapInCents: number = reliefGapInCents;
 
   for (const commitment of sortedSoftCommitments) {
-    if (remainingGap <= 0) break;
+    if (remainingGapInCents <= 0) break;
 
-    const available: number = Math.abs(commitment.amount);
-    const take: number = Math.min(available, remainingGap);
+    const availableCents: number = Math.round(
+      Math.abs(commitment.amount) * 100,
+    );
+    const takeCents: number = Math.min(availableCents, remainingGapInCents);
 
     actions.push({
       targetEventId: commitment.id,
       label: commitment.label,
-      amountUnlocked: take,
-      remainingCommitment: available - take,
+      amountUnlocked: takeCents / 100,
+      remainingCommitment: (availableCents - takeCents) / 100,
     });
 
-    remainingGap -= take;
+    remainingGapInCents -= takeCents;
   }
-  const totalReliefAmount: number = actions.reduce(
-    (sum, action) => sum + action.amountUnlocked,
+  const totalReliefAmountInCents: number = actions.reduce(
+    (sum, action) => sum + Math.round(action.amountUnlocked * 100),
     0,
   );
   const predictedBalance: number =
-    Math.round((minEvent.runningBalance + totalReliefAmount) * 100) / 100;
+    (minEventBalanceInCents + totalReliefAmountInCents) / 100;
 
-  const isFullyResolved: boolean = totalReliefAmount >= reliefGap;
+  const isFullyResolved: boolean = totalReliefAmountInCents >= reliefGapInCents;
 
   const savingsRelief: SavingsRelief = {
     actions: actions,
-    totalReliefAmount: totalReliefAmount,
+    totalReliefAmount: totalReliefAmountInCents / 100,
     predictedBalance: predictedBalance,
     isFullyResolved: isFullyResolved,
   };
