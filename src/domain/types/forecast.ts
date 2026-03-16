@@ -26,22 +26,38 @@ export const SimpleTimelineSchema = z.object({
 });
 export type SimpleTimeline = z.infer<typeof SimpleTimelineSchema>;
 
-export const reliefActionSchema = z.object({
+export const ReliefActionSchema = z.object({
   targetEventId: z.string(),
   label: z.string(),
   amountUnlocked: z.number(),
   remainingCommitment: z.number(),
 });
-export type ReliefAction = z.infer<typeof reliefActionSchema>;
+export type ReliefAction = z.infer<typeof ReliefActionSchema>;
 
 export const SavingsReliefSchema = z.object({
-  actions: z.array(reliefActionSchema),
+  actions: z.array(ReliefActionSchema),
   totalReliefAmount: z.number(),
   predictedBalance: z.number(),
   isFullyResolved: z.boolean(),
 });
 
 export type SavingsRelief = z.infer<typeof SavingsReliefSchema>;
+
+export const SuggestedDeferralActionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  amount: z.number(),
+  date: z.coerce.date(),
+});
+export type SuggestedDeferralAction = z.infer<
+  typeof SuggestedDeferralActionSchema
+>;
+
+export const DeferralPlanSchema = z.object({
+  actions: z.array(SuggestedDeferralActionSchema),
+  isNowResolved: z.boolean(),
+});
+export type DeferralPlan = z.infer<typeof DeferralPlanSchema>;
 
 export const Inflow = z.object({
   amount: z.number(),
@@ -140,6 +156,7 @@ export const ForecastOutputSchema = z.object({
     breakdown: BreakdownSchema,
   }),
   suggestedRelief: z.optional(SavingsReliefSchema).nullable(),
+  deferralPlan: z.optional(DeferralPlanSchema).nullable(),
 });
 export type ForecastOutput = z.infer<typeof ForecastOutputSchema>;
 
