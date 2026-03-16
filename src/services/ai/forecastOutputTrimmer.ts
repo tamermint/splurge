@@ -62,6 +62,7 @@ export function trimForecastOutputForAI(
       breakdown: simpleBreakdownIfWait,
     },
     suggestedRelief: forecast.suggestedRelief,
+    deferralPlan: forecast.deferralPlan,
   };
 
   return trimmedForecastOutput;

@@ -19,12 +19,14 @@ import {
   TimelineEvent,
   oneOffExpense,
   SavingsRelief,
+  DeferralPlan,
 } from "@/domain/types/forecast";
 import { ValidationError } from "@/lib/errors";
 import { z } from "zod";
 import { recurrenceGenerator } from "../rules/recurrenceGenerator";
 import { inflowGenerator } from "../rules/inflowGenerator";
 import { calculateSavingsRelief } from "./calculateSavingsRelief";
+import { calculateDeferrals } from "./calculateDeferrals";
 
 /**
  * Computes a dual-window forecast of safe-to-splurge amounts.
@@ -256,22 +258,37 @@ export async function computeForecast(
   const statusB: string = getSplurgeStatus(splurgeNowB);
 
   // ============================================================================
-  // STEP 15: Calculate the savings relief plan for both windows
+  // STEP 15: Sort the global timeline for relief and deferrals
   // ============================================================================
 
   const globalTimeline: TimelineEvent[] = [...timelineA, ...timelineB];
   const sortedGlobalTimeline: TimelineEvent[] = globalTimeline.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
   );
+
+  // ============================================================================
+  // STEP 16: Calculate the savings relief plan for both windows
+  // ============================================================================
+
   const savingsRelief: SavingsRelief | null = calculateSavingsRelief(
     sortedGlobalTimeline,
     buffer,
   );
 
   // ============================================================================
-  // STEP 16: Return Dual-Window Forecast Output And Savings Relief Plan
+  // STEP 17: Calculate deferral plan if needed
   // ============================================================================
-  // Construct and return the complete forecast containing both scenarios and the savings relief
+
+  const deferralPlan: DeferralPlan | null = calculateDeferrals(
+    sortedGlobalTimeline,
+    savingsRelief,
+    buffer,
+  );
+
+  // ============================================================================
+  // STEP 18: Return Dual-Window Forecast Output And Savings Relief Plan
+  // ============================================================================
+  // Construct and return the complete forecast containing both scenarios, the savings relief and deferrals
 
   return {
     now: {
@@ -285,5 +302,6 @@ export async function computeForecast(
       breakdown: breakdownB,
     },
     suggestedRelief: savingsRelief,
+    deferralPlan: deferralPlan,
   };
 }
