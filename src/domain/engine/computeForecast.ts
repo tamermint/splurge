@@ -285,9 +285,9 @@ export async function computeForecast(
     buffer,
   );
 
-  // ============================================================================
-  // STEP 18: Return Dual-Window Forecast Output And Savings Relief Plan
-  // ============================================================================
+  // ===================================================================================
+  // STEP 18: Return Dual-Window Forecast Output, Savings Relief Plan and patience bonus
+  // ===================================================================================
   // Construct and return the complete forecast containing both scenarios, the savings relief and deferrals
 
   return {
@@ -301,6 +301,7 @@ export async function computeForecast(
       status: statusB,
       breakdown: breakdownB,
     },
+    patiencePayoff: splurgeNowB - splurgeNowA,
     suggestedRelief: savingsRelief,
     deferralPlan: deferralPlan,
   };

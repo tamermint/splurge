@@ -155,6 +155,7 @@ export const ForecastOutputSchema = z.object({
     status: z.string(),
     breakdown: BreakdownSchema,
   }),
+  patiencePayoff: z.number(),
   suggestedRelief: z.optional(SavingsReliefSchema).nullable(),
   deferralPlan: z.optional(DeferralPlanSchema).nullable(),
 });
