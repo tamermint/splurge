@@ -115,6 +115,17 @@ export const splurgeStatusSchema = z.enum([
 ]);
 export type splurgeStatus = z.infer<typeof splurgeStatusSchema>;
 
+export const SplurgeGoalSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  goalType: z.enum(["asset", "experience"]),
+  targetAmount: z.number(),
+  currentProgress: z.number().min(0).max(100),
+  priority: z.number().min(1).max(3),
+  isAutoFunded: z.boolean().default(false),
+});
+export type SplurgeGoal = z.infer<typeof SplurgeGoalSchema>;
+
 export const ForecastInputSchema = z.object({
   paySchedule: PayScheduleSchema,
   bills: z.array(BillSchema),
@@ -122,6 +133,7 @@ export const ForecastInputSchema = z.object({
   baselines: z.array(BaselineSchema),
   expenses: z.optional(z.array(oneOffExpenseSchema)),
   buffer: z.number().default(50),
+  splurgeGoal: SplurgeGoalSchema.optional(),
 });
 export type ForecastInput = z.infer<typeof ForecastInputSchema>;
 

@@ -46,7 +46,6 @@ export function getSplurgeStatus(splurgeAmount: number): splurgeStatus {
   const SPLRUGE_THRESHOLD_AMBER: number = 50;
 
   // Determine status based on splurge amount range
-  let splurgeStatus: splurgeStatus;
 
   if (splurgeAmount >= SPLRUGE_THRESHOLD_GREEN) {
     // ✅ GREEN: Healthy discretionary budget

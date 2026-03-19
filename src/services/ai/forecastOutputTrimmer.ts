@@ -63,6 +63,7 @@ export function trimForecastOutputForAI(
     },
     suggestedRelief: forecast.suggestedRelief,
     deferralPlan: forecast.deferralPlan,
+    patiencePayoff: forecast.patiencePayoff,
   };
 
   return trimmedForecastOutput;
