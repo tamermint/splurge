@@ -120,7 +120,7 @@ export const SplurgeGoalSchema = z.object({
   name: z.string(),
   goalType: z.enum(["asset", "experience"]),
   targetAmount: z.number(),
-  currentProgress: z.number().min(0).max(100),
+  currentProgress: z.number(),
   priority: z.number().min(1).max(3),
   isAutoFunded: z.boolean().default(false),
 });
