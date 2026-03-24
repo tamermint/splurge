@@ -48,30 +48,34 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Step 7: Lint - Quality gate check
+      # Step 7: Generate Prisma Client
+      - name: Generate Prisma Client
+        run: pnpm dlx prisma generate
+
+      # Step 8: Lint - Quality gate check
       - name: Lint
         run: pnpm lint
 
-      # Step 8: Type-check - Catch TypeScript errors
+      # Step 9: Type-check - Catch TypeScript errors
       - name: Type-check
         run: pnpm exec tsc --noEmit
 
-      # Step 9: Test - Verify logic and math
+      # Step 10: Test - Verify logic and math
       - name: Test
         run: pnpm test
 
-      # Step 10: Build - Ultimate sanity check
+      # Step 11: Build - Ultimate sanity check
       - name: Build
         run: pnpm build
         env:
           GEMINI_API_KEY: ${{'build_dummy_key'}}
 
-      # Step 11: Start the server
+      # Step 12: Start the server
       - name: Start production server
         run: pnpm start > /tmp/server.log 2>&1 &
         shell: bash
 
-      # Step 12: Wait for server to be ready
+      # Step 13: Wait for server to be ready
       - name: Wait for server to be healthy
         run: |
           for i in {1..30}; do
@@ -87,7 +91,7 @@ jobs:
           exit 1
         shell: bash
 
-      # Step 13: Run integration tests
+      # Step 14: Run integration tests
       - name: Run integration tests
         run: |
           bash src/__tests__/scenarios/test-forecast-happypath.sh
