@@ -13,6 +13,7 @@ export const TimelineEventSchema = z.object({
   priority: z.optional(z.number()),
   runningBalance: z.number(),
   liquidityStatus: z.literal(["stable", "warning", "critical"]),
+  headroom: z.number(),
 });
 export type TimelineEvent = z.infer<typeof TimelineEventSchema>;
 
@@ -35,6 +36,7 @@ export const ReliefActionSchema = z.object({
 export type ReliefAction = z.infer<typeof ReliefActionSchema>;
 
 export const SavingsReliefSchema = z.object({
+  minBalanceDate: z.coerce.date(),
   actions: z.array(ReliefActionSchema),
   totalReliefAmount: z.number(),
   predictedBalance: z.number(),
@@ -80,6 +82,7 @@ export const BillSchema = z.object({
   scheduleType: z.literal(["weekly", "fortnightly", "monthly", "yearly"]),
   payRail: z.string(),
   payType: z.literal(["auto-debit", "manual"]),
+  deferredUntil: z.optional(z.coerce.date()),
 });
 export type Bill = z.infer<typeof BillSchema>;
 
@@ -156,6 +159,15 @@ export const SimpleBreakdownSchema = BreakdownSchema.omit({
 });
 export type SimpleBreakdown = z.infer<typeof SimpleBreakdownSchema>;
 
+export const StructuralDeficitSchema = z.object({
+  shortfall: z.number(),
+  criticalDate: z.coerce.date(),
+  resolutionDate: z.coerce.date().nullable(),
+  daysUnderBuffer: z.number(),
+  isTerminal: z.boolean(),
+});
+export type StructuralDeficit = z.infer<typeof StructuralDeficitSchema>;
+
 export const ForecastOutputSchema = z.object({
   now: z.object({
     safeToSplurge: z.number(),
@@ -170,6 +182,7 @@ export const ForecastOutputSchema = z.object({
   patiencePayoff: z.number(),
   suggestedRelief: z.optional(SavingsReliefSchema).nullable(),
   deferralPlan: z.optional(DeferralPlanSchema).nullable(),
+  structuralDeficit: z.optional(StructuralDeficitSchema).nullable(),
 });
 export type ForecastOutput = z.infer<typeof ForecastOutputSchema>;
 

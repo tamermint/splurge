@@ -4,6 +4,9 @@ module.exports = {
   roots: ["<rootDir>/src"],
   testMatch: ["**/__tests__/**/*.ts", "**/?(*).test.ts"],
   moduleNameMapper: {
+    // Priority 1: Specific Prisma Alias
+    "^@/prisma-client$": "<rootDir>/src/generated/prisma",
+    // Priority 2: General src Alias
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   transform: {
@@ -11,7 +14,8 @@ module.exports = {
       "ts-jest",
       {
         tsconfig: {
-          jsx: "react",
+          // Ensure this points to your project tsconfig
+          jsx: "react-jsx",
         },
       },
     ],

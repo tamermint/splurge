@@ -12,7 +12,7 @@ export function trimForecastOutputForAI(
 ): TrimmedForecastOutput {
   const simplifyTimeline = (timeline: TimelineEvent[]): SimpleTimeline[] =>
     timeline.map((timelineEvent) => ({
-      date: timelineEvent.timestamp.toISOString().split("T")[0],
+      date: timelineEvent.timestamp.toISOString(),
       label: timelineEvent.label,
       type: timelineEvent.type,
       amount: timelineEvent.amount,
@@ -64,6 +64,7 @@ export function trimForecastOutputForAI(
     suggestedRelief: forecast.suggestedRelief,
     deferralPlan: forecast.deferralPlan,
     patiencePayoff: forecast.patiencePayoff,
+    structuralDeficit: forecast.structuralDeficit,
   };
 
   return trimmedForecastOutput;

@@ -1,9 +1,10 @@
 #!/bin/bash
-# Updated: Feb 26, 2026 for Event-Driven State Machine
-# Scenario: Standard user, healthy liquidity, all bills sequenced.
+# Updated: March 24, 2026 for Triple-Tier Recovery Architecture
+# Scenario: Healthy user, discretionary surplus, no maneuvers required.
 
-echo "=== SPLURGE ENGINE: HAPPY PATH INTEGRATION TEST ==="
+echo "=== SPLURGE ENGINE: HAPPY PATH INTEGRATION TEST (APRIL 2026) ==="
 
+# We set a future payday of April 1st to anchor the forecast window
 curl -X POST http://localhost:3000/api/forecast \
   -H "Content-Type: application/json" \
   -d '{
@@ -11,36 +12,37 @@ curl -X POST http://localhost:3000/api/forecast \
       "frequency": "fortnightly",
       "inflows": [
         {
-          "amount": 3704.32,
-          "date": "2026-02-04",
-          "label": "Primary Salary"
+          "amount": 4200.00,
+          "date": "2026-04-01",
+          "label": "April Salary Anchor"
         }
       ]
     },
     "bills": [
-      {"id": 1, "name": "Internet", "amount": 55, "dueDate": "2026-02-02", "scheduleType": "monthly", "payRail": "AMEX", "payType": "manual"},
-      {"id": 2, "name": "Electricity", "amount": 120, "dueDate": "2026-02-10", "scheduleType": "monthly", "payRail": "BANK", "payType": "auto-debit"},
-      {"id": 3, "name": "Phone", "amount": 40, "dueDate": "2026-03-19", "scheduleType": "monthly", "payRail": "BANK", "payType": "auto-debit"},
-      {"id": 4, "name": "Rent", "amount": 1500, "dueDate": "2026-01-20", "scheduleType": "monthly", "payRail": "BANK", "payType": "auto-debit"}
+      {"id": 1, "name": "Internet", "amount": 80, "dueDate": "2026-04-02", "scheduleType": "monthly", "payRail": "AMEX", "payType": "manual"},
+      {"id": 2, "name": "Electricity", "amount": 150, "dueDate": "2026-04-10", "scheduleType": "monthly", "payRail": "BANK", "payType": "auto-debit"},
+      {"id": 3, "name": "Rent", "amount": 1800, "dueDate": "2026-04-01", "scheduleType": "monthly", "payRail": "BANK", "payType": "auto-debit"}
     ],
     "expenses": [],
     "commitments": [
       {
-        "commitmentType": "Long-term Savings",
-        "commitmentAmount": 1100,
+        "commitmentType": "House Deposit",
+        "commitmentAmount": 500,
         "constraint": "soft",
         "priority": 1
-      },
-      {
-        "commitmentType": "loan",
-        "commitmentAmount": 600,
-        "constraint": "soft",
-        "priority": 2
       }
     ],
     "baselines": [
-      {"name": "groceries", "amount": 300},
-      {"name": "transport", "amount": 70}
+      {"name": "groceries", "amount": 400},
+      {"name": "transport", "amount": 100}
     ],
     "buffer": 500
-  }' | jq '.'
+  }' | jq '.data | {
+    status_A: .now.status,
+    splurge_A: .now.safeToSplurge,
+    status_B: .ifWait.status,
+    patiencePayoff: .patiencePayoff,
+    relief: .suggestedRelief,
+    deferrals: .deferralPlan,
+    deficit: .structuralDeficit
+  }'

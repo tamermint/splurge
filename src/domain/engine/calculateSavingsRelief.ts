@@ -74,7 +74,10 @@ export function calculateSavingsRelief(
 
   const isFullyResolved: boolean = totalReliefAmountInCents >= reliefGapInCents;
 
+  const minBalanceDate: Date = minEvent.timestamp;
+
   const savingsRelief: SavingsRelief = {
+    minBalanceDate: minBalanceDate,
     actions: actions,
     totalReliefAmount: totalReliefAmountInCents / 100,
     predictedBalance: predictedBalance,

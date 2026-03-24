@@ -19,6 +19,7 @@ function createTimelineEvent(
     priority: 0,
     runningBalance: 1000,
     liquidityStatus: "stable",
+    headroom: 0,
     ...overrides,
   };
 }

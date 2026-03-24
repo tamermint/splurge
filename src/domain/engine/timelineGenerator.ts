@@ -35,6 +35,7 @@ export function timelineGenerator(
       paymentConstraints: "hard",
       runningBalance: 0,
       liquidityStatus: "stable",
+      headroom: 0,
     });
 
     commitments.forEach((commitment) => {
@@ -52,6 +53,7 @@ export function timelineGenerator(
         priority: commitment.priority,
         runningBalance: 0,
         liquidityStatus: "stable",
+        headroom: 0,
       });
     });
 
@@ -69,6 +71,7 @@ export function timelineGenerator(
         paymentConstraints: "soft",
         runningBalance: 0,
         liquidityStatus: "stable",
+        headroom: 0,
       });
     });
   });
@@ -88,24 +91,27 @@ export function timelineGenerator(
       paymentConstraints: "soft",
       runningBalance: 0,
       liquidityStatus: "stable",
+      headroom: 0,
     });
   });
 
   //Map the bills
   windowBills.forEach((bill) => {
+    const effectiveDate: Date = bill.deferredUntil || bill.dueDate;
     timelineEvents.push({
       id: createHash("sha256")
         .update(
           `${bill.dueDate}-${bill.amount}-${bill.name.toLowerCase().replace(/\s+/g, "")}`,
         )
         .digest("hex"),
-      timestamp: bill.dueDate,
+      timestamp: effectiveDate,
       type: "bill",
       label: bill.name,
       amount: -bill.amount,
       paymentConstraints: bill.payType == "auto-debit" ? "hard" : "soft",
       runningBalance: 0,
       liquidityStatus: "stable",
+      headroom: 0,
     });
   });
 
@@ -123,6 +129,11 @@ export function timelineGenerator(
   timelineEvents.forEach((timelineEvent) => {
     currentBalance += timelineEvent.amount;
     timelineEvent.runningBalance = Math.round(currentBalance * 100) / 100;
+
+    timelineEvent.headroom = Math.max(
+      0,
+      Math.round((timelineEvent.runningBalance - buffer) * 100) / 100,
+    );
 
     if (timelineEvent.runningBalance <= 0) {
       timelineEvent.liquidityStatus = "critical";

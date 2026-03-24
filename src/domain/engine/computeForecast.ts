@@ -20,6 +20,7 @@ import {
   oneOffExpense,
   SavingsRelief,
   DeferralPlan,
+  StructuralDeficit,
 } from "@/domain/types/forecast";
 import { ValidationError } from "@/lib/errors";
 import { z } from "zod";
@@ -27,6 +28,7 @@ import { recurrenceGenerator } from "../rules/recurrenceGenerator";
 import { inflowGenerator } from "../rules/inflowGenerator";
 import { calculateSavingsRelief } from "./calculateSavingsRelief";
 import { calculateDeferrals } from "./calculateDeferrals";
+import { calculateStructuralDeficit } from "./calculateStructuralDeficit";
 
 /**
  * Computes a dual-window forecast of safe-to-splurge amounts.
@@ -285,8 +287,20 @@ export async function computeForecast(
     buffer,
   );
 
+  // ============================================================================
+  // STEP 18: Calculate Structural deficit if any
+  // ============================================================================
+
+  const structuralDeficit: StructuralDeficit | null =
+    calculateStructuralDeficit(
+      sortedGlobalTimeline,
+      savingsRelief,
+      deferralPlan,
+      buffer,
+    );
+
   // ===================================================================================
-  // STEP 18: Return Dual-Window Forecast Output, Savings Relief Plan and patience bonus
+  // STEP 19: Return Dual-Window Forecast Output, Savings Relief Plan and patience bonus
   // ===================================================================================
   // Construct and return the complete forecast containing both scenarios, the savings relief and deferrals
 
@@ -304,5 +318,6 @@ export async function computeForecast(
     patiencePayoff: splurgeNowB - splurgeNowA,
     suggestedRelief: savingsRelief,
     deferralPlan: deferralPlan,
+    structuralDeficit: structuralDeficit,
   };
 }

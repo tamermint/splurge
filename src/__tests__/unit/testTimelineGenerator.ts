@@ -97,6 +97,7 @@ describe("Test timeline generator", () => {
         paymentConstraints: "hard",
         runningBalance: 3000.54,
         liquidityStatus: "stable",
+        headroom: 2945.54,
       },
       {
         id: createHash("sha256")
@@ -110,6 +111,7 @@ describe("Test timeline generator", () => {
         priority: 1,
         runningBalance: 2700.54,
         liquidityStatus: "stable",
+        headroom: 2645.54,
       },
       {
         id: createHash("sha256")
@@ -122,6 +124,7 @@ describe("Test timeline generator", () => {
         paymentConstraints: "soft",
         runningBalance: 2400.54,
         liquidityStatus: "stable",
+        headroom: 2345.54,
       },
       {
         id: createHash("sha256")
@@ -134,6 +137,7 @@ describe("Test timeline generator", () => {
         paymentConstraints: "soft",
         runningBalance: 1900.54,
         liquidityStatus: "stable",
+        headroom: 1845.54,
       },
       {
         id: createHash("sha256")
@@ -147,6 +151,7 @@ describe("Test timeline generator", () => {
         priority: 1,
         runningBalance: 1300.54,
         liquidityStatus: "stable",
+        headroom: 1245.54,
       },
       {
         id: createHash("sha256")
@@ -159,6 +164,7 @@ describe("Test timeline generator", () => {
         paymentConstraints: "hard",
         runningBalance: 1990.99,
         liquidityStatus: "stable",
+        headroom: 1935.99,
       },
       {
         id: createHash("sha256")
@@ -172,6 +178,7 @@ describe("Test timeline generator", () => {
         priority: 1,
         runningBalance: 1690.99,
         liquidityStatus: "stable",
+        headroom: 1635.99,
       },
       {
         id: createHash("sha256")
@@ -184,6 +191,7 @@ describe("Test timeline generator", () => {
         paymentConstraints: "soft",
         runningBalance: 1390.99,
         liquidityStatus: "stable",
+        headroom: 1335.99,
       },
       {
         id: createHash("sha256")
@@ -196,6 +204,7 @@ describe("Test timeline generator", () => {
         paymentConstraints: "soft",
         runningBalance: 890.99,
         liquidityStatus: "stable",
+        headroom: 835.99,
       },
       {
         id: createHash("sha256")
@@ -209,6 +218,7 @@ describe("Test timeline generator", () => {
         priority: 1,
         runningBalance: 290.99,
         liquidityStatus: "stable",
+        headroom: 235.99,
       },
       {
         id: createHash("sha256")
@@ -221,6 +231,7 @@ describe("Test timeline generator", () => {
         paymentConstraints: "soft",
         runningBalance: -1209.01,
         liquidityStatus: "critical",
+        headroom: 0,
       },
       {
         id: createHash("sha256")
@@ -233,6 +244,7 @@ describe("Test timeline generator", () => {
         paymentConstraints: "hard",
         runningBalance: -1243.79,
         liquidityStatus: "critical",
+        headroom: 0,
       },
       {
         id: createHash("sha256")
@@ -245,6 +257,7 @@ describe("Test timeline generator", () => {
         paymentConstraints: "hard",
         runningBalance: -1406.55,
         liquidityStatus: "critical",
+        headroom: 0,
       },
     ];
     expect(actualResult).toEqual(expectedResult);
