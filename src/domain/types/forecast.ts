@@ -1,8 +1,17 @@
 import { z } from "zod";
 
 /**
- * Timelive event represents a change in the state of the user's account
+ * @typedef {Object} TimelineEvent
+ * @description The atomic unit of the Splurge Engine. Represents a single state change
+ * in the user's liquidity over time.
+ * @property {string} id - Deterministic SHA-256 hash for idempotent tracking.
+ * @property {Date} timestamp - The ISO-sequenced date of the occurrence.
+ * @property {number} amount - Signed value representing cash flow direction.
+ * Negative (-ve) denotes outflows; Positive (+ve) denotes inflows.
+ * @property {string} liquidityStatus - Categorical safety rating: 'stable', 'warning', or 'critical'.
+ * @property {number} headroom - The literal surplus available above the safety buffer ($RunningBalance - Buffer$).
  */
+
 export const TimelineEventSchema = z.object({
   id: z.string(),
   timestamp: z.coerce.date(),
@@ -17,6 +26,12 @@ export const TimelineEventSchema = z.object({
 });
 export type TimelineEvent = z.infer<typeof TimelineEventSchema>;
 
+/**
+ * @typedef {Object} SimpleTimeline
+ * @description A context-window optimized version of the TimelineEvent.
+ * Strips metadata to maximize token efficiency when passed to the AI Strategic Analyst.
+ */
+
 export const SimpleTimelineSchema = z.object({
   date: z.string(),
   label: TimelineEventSchema.shape.label,
@@ -27,6 +42,11 @@ export const SimpleTimelineSchema = z.object({
 });
 export type SimpleTimeline = z.infer<typeof SimpleTimelineSchema>;
 
+/**
+ * @typedef {Object} ReliefAction
+ * @description Targeted commitments needed for the Savings Relief object
+ */
+
 export const ReliefActionSchema = z.object({
   targetEventId: z.string(),
   label: z.string(),
@@ -34,6 +54,12 @@ export const ReliefActionSchema = z.object({
   remainingCommitment: z.number(),
 });
 export type ReliefAction = z.infer<typeof ReliefActionSchema>;
+
+/**
+ * @typedef {Object} SavingsRelief (Tier 1)
+ * @description The output of the "Savings Paradox" solver. Identifies which soft
+ * commitments can be pivoted to prevent a liquidity breach.
+ */
 
 export const SavingsReliefSchema = z.object({
   minBalanceDate: z.coerce.date(),
@@ -45,6 +71,10 @@ export const SavingsReliefSchema = z.object({
 
 export type SavingsRelief = z.infer<typeof SavingsReliefSchema>;
 
+/**
+ * @typedef {Object} SuggestedDeferralAction
+ * @description Targeted bills needed for the deferral action
+ */
 export const SuggestedDeferralActionSchema = z.object({
   id: z.string(),
   label: z.string(),
@@ -55,11 +85,21 @@ export type SuggestedDeferralAction = z.infer<
   typeof SuggestedDeferralActionSchema
 >;
 
+/**
+ * @typedef {Object} DeferralPlan (Tier 2)
+ * @description The strategic rescheduling plan for manual liabilities.
+ * Maps bills to validated "Safe Landing Zones" in the future timeline.
+ */
 export const DeferralPlanSchema = z.object({
   actions: z.array(SuggestedDeferralActionSchema),
   isNowResolved: z.boolean(),
 });
 export type DeferralPlan = z.infer<typeof DeferralPlanSchema>;
+
+/**
+ * @typedef {Object} Inflow
+ * @description Represents cashflow into the user's state
+ */
 
 export const Inflow = z.object({
   amount: z.number(),
@@ -68,12 +108,23 @@ export const Inflow = z.object({
 });
 export type Inflow = z.infer<typeof Inflow>;
 
+/**
+ * @typedef {Object} PaySchedule
+ * @description Represents the pay frequency and inflows of the user
+ */
+
 export const PayScheduleSchema = z.object({
   frequency: z.literal(["weekly", "fortnightly", "monthly"]),
   inflows: z.array(Inflow),
 });
 export type PaySchedule = z.infer<typeof PayScheduleSchema>;
 
+/**
+ * @typedef {Object} Bill
+ * @description represents a bill that a user pays
+ * @example Insurance, internet, electricity
+ *
+ */
 export const BillSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -86,9 +137,17 @@ export const BillSchema = z.object({
 });
 export type Bill = z.infer<typeof BillSchema>;
 
+/**
+ * @typedef {Object} FutureBill
+ * @description similar to a bill object but withiout id - to be used for future projections of the same bill
+ */
 export const FutureBillSchema = BillSchema.omit({ id: true });
 export type FutureBill = z.infer<typeof FutureBillSchema>;
 
+/**
+ * @typedef {Object} Commitment
+ * @description That user has to pay i.e. a loan, weekly savings etc.
+ */
 export const CommitmentSchema = z.object({
   commitmentType: z.string(),
   commitmentAmount: z.number(),
@@ -97,12 +156,20 @@ export const CommitmentSchema = z.object({
 });
 export type Commitment = z.infer<typeof CommitmentSchema>;
 
+/**
+ * @typedef {Object} Baseline
+ * @description Basic necessities, groceries, transport, fuel
+ */
 export const BaselineSchema = z.object({
   name: z.string(),
   amount: z.number(),
 });
 export type Baseline = z.infer<typeof BaselineSchema>;
 
+/**
+ * @typedef {Object} oneOffExpense
+ * @description Suprise repair, random shopping urge
+ */
 export const oneOffExpenseSchema = z.object({
   name: z.string(),
   amount: z.number(),
@@ -110,6 +177,10 @@ export const oneOffExpenseSchema = z.object({
 });
 export type oneOffExpense = z.infer<typeof oneOffExpenseSchema>;
 
+/**
+ * @typedef {Object} splurgeStatus
+ * @description enum outlining if they have budget to "frivolously spend"
+ */
 export const splurgeStatusSchema = z.enum([
   "green",
   "amber",
@@ -118,6 +189,10 @@ export const splurgeStatusSchema = z.enum([
 ]);
 export type splurgeStatus = z.infer<typeof splurgeStatusSchema>;
 
+/**
+ * @typedef {Object} SplurgeGoal
+ * @description What would they want to "frivolously spend" on - this is where value aligned spending comes into play
+ */
 export const SplurgeGoalSchema = z.object({
   id: z.uuid(),
   name: z.string(),
@@ -129,6 +204,11 @@ export const SplurgeGoalSchema = z.object({
 });
 export type SplurgeGoal = z.infer<typeof SplurgeGoalSchema>;
 
+/**
+ * @typedef {Object} ForecastInput
+ * @description The primary ingestion schema. Requires a pay schedule,
+ * known bills, and user-defined baselines to initialize the simulation.
+ */
 export const ForecastInputSchema = z.object({
   paySchedule: PayScheduleSchema,
   bills: z.array(BillSchema),
@@ -140,6 +220,10 @@ export const ForecastInputSchema = z.object({
 });
 export type ForecastInput = z.infer<typeof ForecastInputSchema>;
 
+/**
+ * @typedef {Object} Breakdown
+ * @description Representation of a user's profile - income, commitments, baselines, buffer, bills, the timeline of events etc.
+ */
 export const BreakdownSchema = z.object({
   income: z.number(),
   commitments: z.array(CommitmentSchema),
@@ -152,6 +236,11 @@ export const BreakdownSchema = z.object({
 });
 export type Breakdown = z.infer<typeof BreakdownSchema>;
 
+/**
+ * @typedef {Object} SimpleBreakdown
+ * @description Context window optimized version of Breakdown for analysis by AI Strategic Analyst
+ */
+
 export const SimpleBreakdownSchema = BreakdownSchema.omit({
   timeline: true,
 }).extend({
@@ -159,6 +248,12 @@ export const SimpleBreakdownSchema = BreakdownSchema.omit({
 });
 export type SimpleBreakdown = z.infer<typeof SimpleBreakdownSchema>;
 
+/**
+ * @typedef {Object} StructuralDeficit (Tier 3)
+ * @description The forensic analysis of an unresolvable breach.
+ * Calculates the "Distance-to-Stability" when maneuvers are exhausted.
+ * Shortfall is calculated as: $$Shortfall = \max(0, Buffer - PredictedBalance)$$
+ */
 export const StructuralDeficitSchema = z.object({
   shortfall: z.number(),
   criticalDate: z.coerce.date(),
@@ -168,6 +263,12 @@ export const StructuralDeficitSchema = z.object({
 });
 export type StructuralDeficit = z.infer<typeof StructuralDeficitSchema>;
 
+/**
+ * @typedef {Object} ForecastOutput
+ * @description The comprehensive state of the treasury. Compares the "Now"
+ * splurge power against the "If Wait" splurge power to calculate the
+ * `patiencePayoff`—the mathematical reward for discipline.
+ */
 export const ForecastOutputSchema = z.object({
   now: z.object({
     safeToSplurge: z.number(),
@@ -186,6 +287,12 @@ export const ForecastOutputSchema = z.object({
 });
 export type ForecastOutput = z.infer<typeof ForecastOutputSchema>;
 
+/**
+ * @typedef {Object} TrimmedForecastOutput
+ * @description A context-window optimized version of the Forecast Output
+ * Strips metadata to maximize token efficiency when passed to the AI Strategic Analyst.
+ */
+
 export const TrimmedForecastOutputSchema = ForecastOutputSchema.extend({
   now: ForecastOutputSchema.shape.now.extend({
     breakdown: SimpleBreakdownSchema,
@@ -196,12 +303,20 @@ export const TrimmedForecastOutputSchema = ForecastOutputSchema.extend({
 });
 export type TrimmedForecastOutput = z.infer<typeof TrimmedForecastOutputSchema>;
 
+/**
+ * @typedef {Object} BillsInWindowResult
+ * @description Array of all bills in a time window
+ */
 export const BillsInWindowResultSchema = z.object({
   bills: z.array(z.union([BillSchema, FutureBillSchema])),
   totalAmount: z.number(),
 });
 export type BillsInWindowResult = z.infer<typeof BillsInWindowResultSchema>;
 
+/**
+ * @typedef {Object} InflowsInWindowResult
+ * @description Array of all inflows in a time window
+ */
 export const InflowsInWindowResultSchema = z.object({
   inflows: z.array(Inflow),
   totalAmount: z.number(),
