@@ -6,6 +6,37 @@ import {
 } from "../types/forecast";
 import { ValidationError } from "@/lib/errors";
 
+/**
+ * @module domain/engine/calculateDeferrals
+ * @description
+ * The Deferral Plan module is the second tier in the Splurge recovery waterfall. It
+ * specializes in "Temporal Maneuvering"—the strategic rescheduling of non-automated
+ * liabilities to bridge short-term liquidity gaps.
+ * * ### Architectural Principles:
+ * 1. **Selective Deferral:** The engine only targets bills with "soft" constraints
+ * (manual payments). "Hard" constraints (auto-debits) are treated as immutable
+ * temporal locks that cannot be moved without external intervention.
+ * 2. **Safe Landing Zone Detection:** Unlike simple deferral, this module scans the
+ * future timeline to identify a specific date where the `runningBalance` has enough
+ * `headroom` (balance above buffer) to absorb the bill's impact.
+ * 3. **Virtual Headroom Consumption:** To prevent "Double-Counting" liquidity, the
+ * engine uses a local Map to virtually consume headroom as deferrals are scheduled.
+ * This ensures that rescheduling Bill A doesn't falsely signal safety for Bill B
+ * if they both target the same landing zone.
+ * * ### Dependency Logic:
+ * This module is downstream of Tier 1. It calculates the remaining gap using:
+ * $$RemainingGap = |Relief.predictedBalance| + Buffer$$
+ * * @param {TimelineEvent[]} timelineEvents - The full, computed event stream.
+ * @param {SavingsRelief | null} relief - The outcome of Tier 1; used to establish the
+ * initial deficit and the "min-balance" target date.
+ * @param {number} buffer - The safety margin required to maintain "Stable" status.
+ * * @returns {DeferralPlan | null}
+ * Returns a set of SuggestedDeferralActions if a gap remains after Tier 1 and
+ * manual bills are available for rescheduling. Returns `null` if the crisis is
+ * already resolved or no maneuvers are possible.
+ * * @throws {ValidationError} If the timeline data is absent.
+ */
+
 export function calculateDeferrals(
   timelineEvents: TimelineEvent[],
   relief: SavingsRelief | null,

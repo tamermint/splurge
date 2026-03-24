@@ -9,6 +9,31 @@ import {
 } from "../types/forecast";
 import { createHash } from "crypto";
 
+/**
+ * @module domain/engine/timelineGenerator
+ * @description
+ * The Timeline Generator is the heartbeat of the Splurge Engine. It transforms discrete financial
+ * entities (Inflows, Bills, Commitments) into a high-fidelity, chronologically-ordered stream
+ * of stateful events.
+ * * ### Architectural Principles:
+ * 1. **Savings First (Pay Yourself First):** Commitments and Baselines are programmatically anchored
+ * to Inflow timestamps to ensure liquidity is reserved before any discretionary spending or bills.
+ * 2. **Deterministic Hashing:** Every event ID is generated via SHA-256 using its content properties.
+ * This ensures that identical simulation runs yield identical IDs, enabling stable UI keys and
+ * idempotent state updates.
+ * 3. **Intra-Day Liquidity Sequencing:** Implements a strict sorting hierarchy (Inflow > Commitment > Baseline > Bill)
+ * to prevent "False Dips" where a bill appears to bounce because it was processed before the
+ * day's paycheck.
+ * * @param {Inflow[]} windowInflows - Validated array of income events within the forecast window.
+ * @param {(Bill | FutureBill)[]} windowBills - Known and projected liabilities.
+ * @param {Commitment[]} commitments - Savings goals and recurring financial obligations.
+ * @param {Baseline[]} baselines - Daily/Weekly living expense anchors (e.g., groceries).
+ * @param {oneOffExpense[]} expenses - Ad-hoc, non-recurring outflows.
+ * @param {number} buffer - The user-defined safety margin; the threshold between 'Stable' and 'Warning' status.
+ * @param {number} startingBalance - The literal cash-on-hand at T=0.
+ * * @returns {TimelineEvent[]} A fully computed array of events including running balances, liquidity statuses, and headroom.
+ */
+
 export function timelineGenerator(
   windowInflows: Inflow[],
   windowBills: (Bill | FutureBill)[],

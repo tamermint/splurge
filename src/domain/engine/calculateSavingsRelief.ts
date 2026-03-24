@@ -2,6 +2,32 @@ import { ValidationError } from "@/lib/errors";
 import { TimelineEvent } from "../types/forecast";
 import { SavingsRelief, ReliefAction } from "../types/forecast";
 
+/**
+ * @module domain/engine/calculateSavingsRelief
+ * @description
+ * The Savings Relief module is the first responder in the Splurge recovery waterfall.
+ * It identifies "Temporal Insolvency" caused by soft savings commitments and calculates
+ * the surgical maneuvers required to restore the safety buffer.
+ * * ### Architectural Principles:
+ * 1. **Integer Supremacy:** To avoid IEEE 754 floating-point errors (e.g., 0.1 + 0.2 != 0.3),
+ * all internal calculations are performed in **Cents** using `Math.round(x * 100)`.
+ * 2. **Priority-Based Attrition:** The engine targets "Soft" commitments (constraints: "soft")
+ * and sacrifices them in descending order of their priority value.
+ * 3. **The Savings Paradox Solver:** It recognizes that "saving" is a discretionary choice.
+ * If saving $500 results in a $100 shortfall, this module "unlocks" that liquidity to maintain
+ * baseline survival and buffer integrity.
+ * * ### Relief Gap Formula:
+ * The required relief is defined as the distance from the deepest timeline "ditch"
+ * back to the user's defined safety margin:
+ * ReliefGap = |MinBalance| + Buffer
+ * * @param {TimelineEvent[]} timelineEvents - The chronologically ordered event stream from the generator.
+ * @param {number} buffer - The safety threshold (in dollars) that must be maintained.
+ * * @returns {SavingsRelief | null}
+ * Returns a set of ReliefActions if a shortfall is detected and soft commitments are available.
+ * Returns `null` if the user is already stable or no soft commitments exist to pivot.
+ * * @throws {ValidationError} If the timeline is empty or null.
+ */
+
 export function calculateSavingsRelief(
   timelineEvents: TimelineEvent[],
   buffer: number,
