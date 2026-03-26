@@ -118,3 +118,5 @@ Computed for two windows:
 | ------------------ | ------------------------------- |
 | ⏰ **Now**         | Current moment to next payday   |
 | ⏳ **If You Wait** | Next payday to following payday |
+
+-- Test: checking key
