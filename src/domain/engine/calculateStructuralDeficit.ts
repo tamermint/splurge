@@ -42,16 +42,16 @@ export function calculateStructuralDeficit(
     throw new ValidationError("There must be atleast one timeline event");
   }
 
+  //If eveything is resolved, there is no structural deficit
+  const isResolved = relief?.isFullyResolved || deferrals?.isNowResolved;
+  if (isResolved) return null;
+
   //calculate the deepest ditch
   //first, we find the event with the lowest running balance in the entire timeline and check if the running balance is below buffer
   const minEvent: TimelineEvent = timeline.reduce((min, e) =>
     e.runningBalance < min.runningBalance ? e : min,
   );
   if (minEvent.runningBalance >= buffer) return null;
-
-  //If eveything is resolved, there is no structural deficit
-  const isResolved = relief?.isFullyResolved || deferrals?.isNowResolved;
-  if (isResolved) return null;
 
   //calculate the remaining shortfall
   const baseShortfall: number = relief

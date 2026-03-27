@@ -11,3 +11,65 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id          String       @unique @default(uuid())
+  name        String
+  email       String       @unique
+  role        Role         @default(USER)
+  paySchedule PaySchedule?
+  Bills       Bills[]
+  splurgeGoal SplurgeGoal?
+}
+
+model Bills {
+  id            String   @unique @default(uuid())
+  name          String
+  amount        Int
+  dueDate       DateTime
+  scheduleType  String
+  payRail       String
+  payType       String
+  deferredUntil DateTime
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String   @unique
+}
+
+model Inflow {
+  id            String      @unique @default(uuid())
+  amount        Int
+  date          DateTime
+  label         String
+  paySchedule   PaySchedule @relation(fields: [payScheduleId], references: [id])
+  payScheduleId String
+}
+
+model PaySchedule {
+  id        String   @id @default(uuid())
+  frequency String
+  inflows   Inflow[]
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+}
+
+model SplurgeGoal {
+  id              String          @unique @default(uuid())
+  name            String
+  goalType        SplurgeGoalType
+  targetAmount    Int
+  currentProgress Int
+  priority        Int
+  isAutoFunded    Boolean         @default(false)
+  users           User            @relation(fields: [userId], references: [id])
+  userId          String          @unique
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SplurgeGoalType {
+  ASSET
+  EXPERIENCE
+}
