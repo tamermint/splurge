@@ -88,8 +88,15 @@ export async function computeForecast(
   // Pay schedule defines frequency and upcoming pay dates
   // Bills, commitments, baselines are outflows
   // Buffer is an expense buffer which should not be exhausted
-  const { paySchedule, bills, commitments, baselines, expenses, buffer } =
-    validationResult.data;
+  const {
+    paySchedule,
+    bills,
+    commitments,
+    baselines,
+    expenses,
+    buffer,
+    startingBalance,
+  } = validationResult.data;
   const frequency: string = paySchedule.frequency;
 
   // ============================================================================
@@ -159,7 +166,7 @@ export async function computeForecast(
     baselines,
     expensesInWindowA,
     buffer,
-    0,
+    startingBalance,
   );
 
   const finalBalanceA: number =
@@ -182,7 +189,7 @@ export async function computeForecast(
     totalBillAmount: totalBillAmountInWindowA,
     allBills: allBillsInWindowA,
     timeline: timelineA,
-    carryOver: 0, // No balance carried from previous window
+    carryOver: startingBalance,
   };
 
   // ========================================================================================

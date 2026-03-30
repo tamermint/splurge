@@ -216,9 +216,23 @@ export const ForecastInputSchema = z.object({
   baselines: z.array(BaselineSchema),
   expenses: z.optional(z.array(oneOffExpenseSchema)),
   buffer: z.number().default(50),
+  startingBalance: z.number().optional().default(0),
   splurgeGoal: SplurgeGoalSchema.optional(),
 });
 export type ForecastInput = z.infer<typeof ForecastInputSchema>;
+
+/**
+ * @typedef {Object} TeaserInput
+ * @description A subset of the forecastInput, not an extension for feeding
+ * the forecastInputSchema
+ */
+export const TeaserInputSchema = z.object({
+  monthlyIncome: z.number(),
+  totalMonthlyBills: z.number(),
+  currentBalance: z.number(),
+  targetSplurge: z.number().optional().default(0),
+});
+export type TeaserInput = z.infer<typeof TeaserInputSchema>;
 
 /**
  * @typedef {Object} Breakdown
