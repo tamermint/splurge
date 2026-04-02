@@ -116,6 +116,7 @@ describe("testDateMapper", () => {
       commitments: commitmentsV2,
       baselines: baselinesV2,
       buffer: bufferV2,
+      startingBalance: 0,
     };
     expect(transformedInput).toEqual(expectedTransformedInput);
     expect(transformedInput.paySchedule.inflows).toBeDefined();

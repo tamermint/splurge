@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
-import { computeForecast } from "@/domain/engine/computeForecast";
-import { generateSplurgeInsights } from "@/services/ai/aiInsights";
-import {
-  ForecastInput,
-  ForecastOutput,
-  TeaserInput,
-  TeaserInputSchema,
-} from "@/domain/types/forecast";
-import { success, z } from "zod";
-import { ValidationError } from "@/lib/errors";
+import { TeaserInputSchema } from "@/domain/types/forecast";
+import { z } from "zod";
 import { forecastTeaser } from "@/domain/teaser/teaserService";
 
 /**
