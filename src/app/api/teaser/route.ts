@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { TeaserInputSchema } from "@/domain/types/forecast";
 import { z } from "zod";
 import { forecastTeaser } from "@/domain/teaser/teaserService";
@@ -14,7 +14,7 @@ import { forecastTeaser } from "@/domain/teaser/teaserService";
  *
  */
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const validationResult = TeaserInputSchema.safeParse(body);
