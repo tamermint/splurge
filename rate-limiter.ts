@@ -7,6 +7,3 @@ const redis = new Redis({
   url: redisURL,
   token: redisToken,
 });
-await redis.set("foo", "bar");
-let data = await redis.get("foo");
-console.log(data);
