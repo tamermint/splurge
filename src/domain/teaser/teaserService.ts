@@ -6,7 +6,7 @@ import { generateTeaserInsights } from "./teaserAIInsights";
  * @description The teaser service will call the computeForecast with a stripped down version of the forecast input
  * and utilize the forecast output to feed a smaller Gemini LLM model - gemini-3-flash to get a quick summary and advertise
  * the switch to the pro version for detailed insights.
- * @constraints Rate limit the API call to 3 per hour for guest/anonymous users
+ * @constraints Rate limit the API call to 10 per hour for guest/anonymous users
  */
 
 export async function forecastTeaser(input: TeaserInput) {

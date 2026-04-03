@@ -7,7 +7,7 @@ import { ForecastOutput } from "../types/forecast";
 
 export async function generateTeaserInsights(
   forecast: ForecastOutput,
-): Promise<String> {
+): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {

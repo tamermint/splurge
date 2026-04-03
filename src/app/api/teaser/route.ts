@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { TeaserInputSchema } from "@/domain/types/forecast";
 import { z } from "zod";
 import { forecastTeaser } from "@/domain/teaser/teaserService";
@@ -20,13 +20,13 @@ export async function POST(req: NextRequest) {
     const validationResult = TeaserInputSchema.safeParse(body);
     if (!validationResult.success) {
       const flattenedError = z.flattenError(validationResult.error);
-      return (
-        NextResponse.json({
+      return NextResponse.json(
+        {
           success: false,
           error: "Invalid input",
           details: flattenedError.fieldErrors,
-        }),
-        { status: 400 }
+        },
+        { status: 400 },
       );
     }
     const result = await forecastTeaser(validationResult.data);
