@@ -12,6 +12,7 @@
     "test-redis-script": "tsx ./rate-limiter.ts"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
     "@google/genai": "^1.43.0",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
@@ -20,10 +21,12 @@
     "@vercel/functions": "^3.4.3",
     "dotenv": "^17.3.1",
     "next": "16.1.3",
+    "next-auth": "5.0.0-beta.30",
     "pg": "^8.20.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "ts-jest": "^29.4.6",
+    "server-only": "^0.0.1",
+    "ts-jest": "^29.4.9",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -44,6 +47,7 @@
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.58.0"
   }
 }

@@ -45,6 +45,7 @@ describe("computeForecast - Magic Month Scenario", () => {
       commitments: [],
       baselines: [],
       buffer: 0,
+      startingBalance: 0,
     };
 
     // Explicitly use the ForecastOutput type here
@@ -104,6 +105,7 @@ describe("computeForecast - Magic Month Scenario", () => {
         commitments: [],
         baselines: [],
         buffer: 0,
+        startingBalance: 0,
       } as ForecastInput,
       midMonthToday,
     );
@@ -150,6 +152,7 @@ describe("computeForecast - Magic Month Scenario", () => {
         commitments: [],
         baselines: [],
         buffer: 50,
+        startingBalance: 0,
       },
       today,
     );

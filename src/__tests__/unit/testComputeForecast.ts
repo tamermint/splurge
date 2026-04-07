@@ -12,27 +12,6 @@ import {
 import { computeForecast } from "@/domain/engine/computeForecast";
 
 describe("computeForecast", () => {
-  // Test 1: Validation still works exactly the same
-  it("should validate input and return error for invalid data", async () => {
-    const date = new Date("2026-02-01");
-    const invalidInput = {
-      paySchedule: {
-        frequency: "fortnightly",
-        inflows: [
-          { amount: "invalid", date: new Date("2026-02-04"), label: "Salary" },
-        ],
-      },
-      bills: [],
-      commitments: [],
-      baselines: [],
-      buffer: 50,
-    } as unknown as ForecastInput;
-
-    await expect(computeForecast(invalidInput, date)).rejects.toThrow(
-      "Validation failed",
-    );
-  });
-
   it("should correctly predict splurge using the sequential timeline", async () => {
     // Strategy: Set today to the Payday so Window A includes the income
     const date = new Date("2026-02-04T00:00:00.000Z");
@@ -79,6 +58,7 @@ describe("computeForecast", () => {
       commitments,
       baselines,
       buffer: 50,
+      startingBalance: 0,
     };
 
     const result: ForecastOutput = await computeForecast(forecastInput, date);
@@ -130,6 +110,7 @@ describe("computeForecast", () => {
       commitments,
       baselines: [],
       buffer: 100,
+      startingBalance: 0,
     };
 
     const result: ForecastOutput = await computeForecast(forecastInput, date);

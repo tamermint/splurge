@@ -1,3 +1,4 @@
+import "server-only";
 import {
   billsInWindow,
   nextUTCIntervalDate,
@@ -12,7 +13,6 @@ import {
   ForecastOutput,
   Breakdown,
   BillsInWindowResult,
-  ForecastInputSchema,
   FutureBill,
   Inflow,
   InflowsInWindowResult,
@@ -22,8 +22,6 @@ import {
   DeferralPlan,
   StructuralDeficit,
 } from "@/domain/types/forecast";
-import { ValidationError } from "@/lib/errors";
-import { z } from "zod";
 import { recurrenceGenerator } from "../rules/recurrenceGenerator";
 import { inflowGenerator } from "../rules/inflowGenerator";
 import { calculateSavingsRelief } from "./calculateSavingsRelief";
@@ -71,18 +69,7 @@ export async function computeForecast(
   today: Date,
 ): Promise<ForecastOutput> {
   // ============================================================================
-  // STEP 1: Validate Input
-  // ============================================================================
-  // Ensure all input data conforms to the expected schema before processing
-  const validationResult = ForecastInputSchema.safeParse(input);
-  if (!validationResult.success) {
-    const flattenedError = z.flattenError(validationResult.error);
-    const errorMsg = JSON.stringify(flattenedError.fieldErrors);
-    throw new ValidationError(`Validation failed: ${errorMsg}`);
-  }
-
-  // ============================================================================
-  // STEP 2: Extract and Aggregate Input Components
+  // STEP 1: Extract and Aggregate Input Components
   // ============================================================================
 
   // Pay schedule defines frequency and upcoming pay dates
@@ -96,11 +83,11 @@ export async function computeForecast(
     expenses,
     buffer,
     startingBalance,
-  } = validationResult.data;
+  } = input;
   const frequency: string = paySchedule.frequency;
 
   // ============================================================================
-  // STEP 3: Calculate Forecast Windows
+  // STEP 2: Calculate Forecast Windows
   // ============================================================================
   // Window A (Now): from today until the next scheduled pay date
   // Window B (If Wait): from next pay date until the pay date after that
@@ -113,7 +100,7 @@ export async function computeForecast(
   const followingPayDay: Date = nextUTCIntervalDate(activePayDay, frequency);
 
   // ============================================================================
-  // STEP 4: Calculate all bills due between today and following pay day
+  // STEP 3: Calculate all bills due between today and following pay day
   // ============================================================================
 
   const allBills: FutureBill[] = bills.flatMap((bill) => {
@@ -121,7 +108,7 @@ export async function computeForecast(
   });
 
   // ============================================================================
-  // STEP 5: Calculate all inflows due between today and following pay day
+  // STEP 4: Calculate all inflows due between today and following pay day
   // ============================================================================
 
   const allInflows: Inflow[] = inflowGenerator(
@@ -131,7 +118,7 @@ export async function computeForecast(
   );
 
   // ==============================================================================
-  // STEP 6: Window A - Calculate bills and expenses due between today and next pay
+  // STEP 5: Window A - Calculate bills and expenses due between today and next pay
   // ==============================================================================
 
   const windowAResult: BillsInWindowResult = billsInWindow(
@@ -146,7 +133,7 @@ export async function computeForecast(
     expenses?.filter((e) => e.date >= today && e.date < activePayDay) ?? [];
 
   // ============================================================================
-  // STEP 7: Window A - Calculate inflows between today and next pay
+  // STEP 6: Window A - Calculate inflows between today and next pay
   // ============================================================================
 
   const windowAInflows: InflowsInWindowResult = inFlowsInWindow(
@@ -156,7 +143,7 @@ export async function computeForecast(
   );
 
   // ============================================================================
-  // STEP 8: Window A - Generate Timeline and calculate splurge for window A
+  // STEP 7: Window A - Generate Timeline and calculate splurge for window A
   // ============================================================================
 
   const timelineA: TimelineEvent[] = timelineGenerator(
@@ -174,7 +161,7 @@ export async function computeForecast(
   const splurgeNowA = Math.round((finalBalanceA - buffer) * 100) / 100;
 
   // ============================================================================
-  // STEP 9: Window A - Itemize window A
+  // STEP 8: Window A - Itemize window A
   // ============================================================================
 
   /**
@@ -193,7 +180,7 @@ export async function computeForecast(
   };
 
   // ========================================================================================
-  // STEP 10: Window B - Calculate bills and expenses due between next pay and following pay
+  // STEP 9: Window B - Calculate bills and expenses due between next pay and following pay
   // ========================================================================================
 
   const windowBresult: BillsInWindowResult = billsInWindow(
@@ -210,7 +197,7 @@ export async function computeForecast(
     ) ?? [];
 
   // ============================================================================
-  // STEP 11: Window B - Calculate inflows between next pay and following pay day
+  // STEP 10: Window B - Calculate inflows between next pay and following pay day
   // ============================================================================
 
   const windowBInflows: InflowsInWindowResult = inFlowsInWindow(
@@ -220,7 +207,7 @@ export async function computeForecast(
   );
 
   // ============================================================================
-  // STEP 12: Window B - Generate Timeline and calculate splurge for window B
+  // STEP 11: Window B - Generate Timeline and calculate splurge for window B
   // ============================================================================
 
   const timelineB: TimelineEvent[] = timelineGenerator(
@@ -240,7 +227,7 @@ export async function computeForecast(
   const splurgeNowB: number = Math.round((finalBalanceB - buffer) * 100) / 100;
 
   // ============================================================================
-  // STEP 13: Window B - Itemize window B
+  // STEP 12: Window B - Itemize window B
   // ============================================================================
 
   /**
@@ -260,14 +247,14 @@ export async function computeForecast(
   };
 
   // ============================================================================
-  // STEP 14: Get splurge status for window A and window B
+  // STEP 13: Get splurge status for window A and window B
   // ============================================================================
 
   const statusA: string = getSplurgeStatus(splurgeNowA);
   const statusB: string = getSplurgeStatus(splurgeNowB);
 
   // ============================================================================
-  // STEP 15: Sort the global timeline for relief and deferrals
+  // STEP 14: Sort the global timeline for relief and deferrals
   // ============================================================================
 
   const globalTimeline: TimelineEvent[] = [...timelineA, ...timelineB];
@@ -276,7 +263,7 @@ export async function computeForecast(
   );
 
   // ============================================================================
-  // STEP 16: Calculate the savings relief plan for both windows
+  // STEP 15: Calculate the savings relief plan for both windows
   // ============================================================================
 
   const savingsRelief: SavingsRelief | null = calculateSavingsRelief(
@@ -285,7 +272,7 @@ export async function computeForecast(
   );
 
   // ============================================================================
-  // STEP 17: Calculate deferral plan if needed
+  // STEP 16: Calculate deferral plan if needed
   // ============================================================================
 
   const deferralPlan: DeferralPlan | null = calculateDeferrals(
@@ -295,7 +282,7 @@ export async function computeForecast(
   );
 
   // ============================================================================
-  // STEP 18: Calculate Structural deficit if any
+  // STEP 17: Calculate Structural deficit if any
   // ============================================================================
 
   const structuralDeficit: StructuralDeficit | null =
@@ -307,7 +294,7 @@ export async function computeForecast(
     );
 
   // ===================================================================================
-  // STEP 19: Return Dual-Window Forecast Output, Savings Relief Plan and patience bonus
+  // STEP 18: Return Dual-Window Forecast Output, Savings Relief Plan and patience bonus
   // ===================================================================================
   // Construct and return the complete forecast containing both scenarios, the savings relief and deferrals
 

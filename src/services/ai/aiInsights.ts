@@ -1,3 +1,4 @@
+import "server-only";
 import { GoogleGenAI } from "@google/genai";
 import { ForecastOutput, TrimmedForecastOutput } from "@/domain/types/forecast";
 import fs from "fs";

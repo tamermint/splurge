@@ -1,3 +1,4 @@
+import "server-only";
 import { ValidationError } from "@/lib/errors";
 import { TimelineEvent } from "../types/forecast";
 import { SavingsRelief, ReliefAction } from "../types/forecast";

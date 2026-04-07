@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { computeForecast } from "domain/engine/computeForecast";
-import { transformIntoDTO } from "./datemapper";
+import { computeForecast } from "@/domain/engine/computeForecast";
+import { transformIntoDTO } from "./DTOMapper";
 import { ValidationError } from "@/lib/errors";
 
 /**

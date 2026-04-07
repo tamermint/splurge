@@ -1,5 +1,5 @@
 import { Baseline, Commitment } from "@/domain/types/forecast";
-import { transformIntoDTO } from "@/app/api/forecast/datemapper";
+import { transformIntoDTO } from "@/app/api/forecast/DTOMapper";
 
 describe("testDateMapper", () => {
   it("should correctly transform the dates in the input", () => {
