@@ -126,7 +126,7 @@ export type PaySchedule = z.infer<typeof PayScheduleSchema>;
  *
  */
 export const BillSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   name: z.string(),
   amount: z.number(),
   dueDate: z.coerce.date(),

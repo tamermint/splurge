@@ -16,7 +16,7 @@ describe("testDateMapper", () => {
       },
       bills: [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: "2026-02-02",
@@ -25,7 +25,7 @@ describe("testDateMapper", () => {
           payType: "auto-debit",
         },
         {
-          id: 2,
+          id: "2",
           name: "Electricity",
           amount: 120,
           dueDate: "2026-02-10",
@@ -34,7 +34,7 @@ describe("testDateMapper", () => {
           payType: "auto-debit",
         },
         {
-          id: 3,
+          id: "3",
           name: "Phone",
           amount: 40,
           dueDate: "2026-02-16",
@@ -70,7 +70,7 @@ describe("testDateMapper", () => {
     };
     const billsV2 = [
       {
-        id: 1,
+        id: "1",
         name: "Internet",
         amount: 55,
         dueDate: new Date("2026-02-02"),
@@ -79,7 +79,7 @@ describe("testDateMapper", () => {
         payType: "auto-debit",
       },
       {
-        id: 2,
+        id: "2",
         name: "Electricity",
         amount: 120,
         dueDate: new Date("2026-02-10"),
@@ -88,7 +88,7 @@ describe("testDateMapper", () => {
         payType: "auto-debit",
       },
       {
-        id: 3,
+        id: "3",
         name: "Phone",
         amount: 40,
         dueDate: new Date("2026-02-16"),

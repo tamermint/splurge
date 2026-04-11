@@ -52,20 +52,21 @@ model VerificationToken {
 }
 
 model User {
-  id            String        @unique @default(uuid())
-  name          String
-  email         String        @unique
-  role          Role          @default(USER)
-  emailVerified DateTime?     @map("email_verified")
-  plan          Plan          @default(FREE)
-  paySchedule   PaySchedule?
-  Bills         Bill[]
-  Commitments   Commitment[]
-  Baselines     Baseline[]
-  splurgeGoals  SplurgeGoal[]
-  buffer        Int
-  accounts      Account[]
-  sessions      Session[]
+  id              String        @unique @default(uuid())
+  name            String
+  email           String        @unique
+  role            Role          @default(USER)
+  emailVerified   DateTime?     @map("email_verified")
+  plan            Plan          @default(FREE)
+  paySchedule     PaySchedule?
+  bills           Bill[]
+  commitments     Commitment[]
+  baselines       Baseline[]
+  splurgeGoals    SplurgeGoal[]
+  buffer          Int
+  startingBalance Int?
+  accounts        Account[]
+  sessions        Session[]
 
   @@map("users")
 }
