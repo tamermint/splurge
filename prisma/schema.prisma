@@ -57,6 +57,7 @@ model User {
   email         String        @unique
   role          Role          @default(USER)
   emailVerified DateTime?     @map("email_verified")
+  plan          Plan          @default(FREE)
   paySchedule   PaySchedule?
   Bills         Bill[]
   Commitments   Commitment[]
@@ -160,4 +161,9 @@ enum Frequency {
   weekly
   fortnightly
   monthly
+}
+
+enum Plan {
+  FREE
+  PRO
 }
