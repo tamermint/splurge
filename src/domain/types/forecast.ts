@@ -102,6 +102,7 @@ export type DeferralPlan = z.infer<typeof DeferralPlanSchema>;
  */
 
 export const Inflow = z.object({
+  id: z.string(),
   amount: z.number(),
   date: z.coerce.date(),
   label: z.string(),
@@ -114,6 +115,7 @@ export type Inflow = z.infer<typeof Inflow>;
  */
 
 export const PayScheduleSchema = z.object({
+  id: z.string(),
   frequency: z.literal(["weekly", "fortnightly", "monthly"]),
   inflows: z.array(Inflow),
 });
@@ -149,6 +151,7 @@ export type FutureBill = z.infer<typeof FutureBillSchema>;
  * @description That user has to pay i.e. a loan, weekly savings etc.
  */
 export const CommitmentSchema = z.object({
+  id: z.string(),
   commitmentType: z.string(),
   commitmentAmount: z.number(),
   constraint: z.literal(["hard", "soft"]),
@@ -161,6 +164,7 @@ export type Commitment = z.infer<typeof CommitmentSchema>;
  * @description Basic necessities, groceries, transport, fuel
  */
 export const BaselineSchema = z.object({
+  id: z.string(),
   name: z.string(),
   amount: z.number(),
 });
@@ -171,6 +175,7 @@ export type Baseline = z.infer<typeof BaselineSchema>;
  * @description Suprise repair, random shopping urge
  */
 export const oneOffExpenseSchema = z.object({
+  id: z.string(),
   name: z.string(),
   amount: z.number(),
   date: z.coerce.date(),
@@ -220,6 +225,9 @@ export const ForecastInputSchema = z.object({
   splurgeGoal: SplurgeGoalSchema.optional(),
 });
 export type ForecastInput = z.infer<typeof ForecastInputSchema>;
+
+export const ForecastOverrideSchema = ForecastInputSchema.partial();
+export type ForecastOverrides = z.infer<typeof ForecastOverrideSchema>;
 
 /**
  * @typedef {Object} TeaserInput

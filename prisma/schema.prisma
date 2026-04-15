@@ -62,6 +62,7 @@ model User {
   bills           Bill[]
   commitments     Commitment[]
   baselines       Baseline[]
+  expenses        Expense[]
   splurgeGoals    SplurgeGoal[]
   buffer          Int
   startingBalance Int?
@@ -82,6 +83,8 @@ model Bill {
   deferredUntil DateTime?
   user          User         @relation(fields: [userId], references: [id])
   userId        String
+
+  @@map("bills")
 }
 
 model Commitment {
@@ -92,6 +95,8 @@ model Commitment {
   priority         Int
   user             User       @relation(fields: [userId], references: [id])
   userId           String
+
+  @@map("commitments")
 }
 
 model Baseline {
@@ -100,6 +105,19 @@ model Baseline {
   amount Int
   user   User   @relation(fields: [userId], references: [id])
   userId String
+
+  @@map("baselines")
+}
+
+model Expense {
+  id     String   @unique @default(uuid())
+  name   String
+  amount Int
+  date   DateTime
+  user   User?    @relation(fields: [userId], references: [id])
+  userId String?
+
+  @@map("expenses")
 }
 
 model Inflow {
@@ -109,6 +127,8 @@ model Inflow {
   label         String
   paySchedule   PaySchedule @relation(fields: [payScheduleId], references: [id])
   payScheduleId String
+
+  @@map("inflows")
 }
 
 model PaySchedule {
@@ -117,6 +137,8 @@ model PaySchedule {
   inflows   Inflow[]
   user      User      @relation(fields: [userId], references: [id])
   userId    String    @unique
+
+  @@map("payschedules")
 }
 
 model SplurgeGoal {
@@ -129,6 +151,8 @@ model SplurgeGoal {
   isAutoFunded    Boolean         @default(false)
   user            User            @relation(fields: [userId], references: [id])
   userId          String          @unique
+
+  @@map("splurgegoals")
 }
 
 enum Role {

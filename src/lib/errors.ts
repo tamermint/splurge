@@ -1,34 +1,48 @@
 export class ValidationError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'ValidationError';
-    }
+  constructor(message: string) {
+    super(message);
+    this.name = "ValidationError";
+  }
 }
 
 export class ForecastError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'ForecastError';
-    }
+  constructor(message: string) {
+    super(message);
+    this.name = "ForecastError";
+  }
 }
 
 export class DateMappingError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'DateMappingError';
-    }
+  constructor(message: string) {
+    super(message);
+    this.name = "DateMappingError";
+  }
 }
 
 export class CalculationError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'CalculationError';
-    }
+  constructor(message: string) {
+    super(message);
+    this.name = "CalculationError";
+  }
 }
 
 export class ScheduleError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'ScheduleError';
-    }
+  constructor(message: string) {
+    super(message);
+    this.name = "ScheduleError";
+  }
+}
+
+export class InvalidUser extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidUser";
+  }
+}
+
+export class IncompleteUser extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "IncompleteUser";
+  }
 }

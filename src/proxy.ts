@@ -115,7 +115,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const { success } = await rateLimiter.pro.limit(identifier);
   if (!success) {
     const response = NextResponse.next();
-    response.headers.set("x-splurge-ai-throttle", "true");
+    response.headers.set("X-splurge-ai-throttle", "true");
     return response;
   }
   return NextResponse.next();

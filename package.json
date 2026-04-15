@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
-    "test-redis-script": "tsx ./rate-limiter.ts"
+    "test-redis-script": "tsx --env-file=.env.local ./test-redis-keepalive.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
