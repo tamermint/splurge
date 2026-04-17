@@ -114,8 +114,8 @@ model Expense {
   name   String
   amount Int
   date   DateTime
-  user   User?    @relation(fields: [userId], references: [id])
-  userId String?
+  user   User     @relation(fields: [userId], references: [id])
+  userId String
 
   @@map("expenses")
 }

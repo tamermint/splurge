@@ -222,7 +222,7 @@ export const ForecastInputSchema = z.object({
   expenses: z.optional(z.array(oneOffExpenseSchema)),
   buffer: z.number().default(50),
   startingBalance: z.number().optional().default(0),
-  splurgeGoal: SplurgeGoalSchema.optional(),
+  splurgeGoal: z.array(SplurgeGoalSchema).optional(),
 });
 export type ForecastInput = z.infer<typeof ForecastInputSchema>;
 

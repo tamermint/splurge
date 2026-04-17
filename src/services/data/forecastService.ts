@@ -3,57 +3,28 @@
 //Return the Forecast output
 import { computeForecast } from "@/domain/engine/computeForecast";
 import { ForecastInput, ForecastOverrides } from "@/domain/types/forecast";
+import { Prisma } from "@/generated/prisma/client";
 import { IncompleteUser, InvalidUser } from "@/lib/errors";
 import prisma from "@/lib/prisma";
+
+const userFinancialGraph = {
+  paySchedule: {
+    include: { inflows: true },
+  },
+  bills: true,
+  commitments: true,
+  baselines: true,
+  expenses: true,
+} satisfies Prisma.UserInclude;pl
+
+//If user has sufficient data, now map the user details to the forecastInput
 
 async function getForecastInputOfUser(
   userId: string,
 ): Promise<ForecastInput | null> {
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-  });
-  const userWithPaySchedule = await prisma.user.findUnique({
-    where: {
-      id: userId,
-      paySchedule: {
-        isNot: null,
-      },
-    },
-  });
-  const forecastInputUser = await prisma.user.findUnique({
-    where: {
-      id: userId,
-      paySchedule: {
-        isNot: null,
-      },
-      inflows: {
-        some: {},
-      },
-      bills: {
-        some: {},
-      },
-      commitments: {
-        some: {},
-      },
-    },
-  });
-  if (!user) {
-    throw new InvalidUser("User not found!");
-  }
-  if (!userWithPaySchedule) {
-    throw new IncompleteUser("User doesn't have a payschedule");
-  }
-  if (!forecastInputUser) {
-    throw new IncompleteUser(
-      "Not sufficient information for forecast engine and AI insight",
-    );
-  }
-  //If user has sufficient data, now map the user details to the forecastInput
   const cleanInput: ForecastInput | null = buildDomainInput(forecastInputUser);
 
-  return cleanInput;
+  return null;
 }
 
 /*export const ForecastInputSchema = z.object({
