@@ -18,8 +18,10 @@ describe("computeForecast - Magic Month Scenario", () => {
 
     const paySchedule: PaySchedule = {
       frequency: "fortnightly",
+      id: "1",
       inflows: [
         {
+          id: "1",
           amount: 3000,
           date: new Date("2026-05-01T00:00:00.000Z"),
           label: "Salary",
@@ -29,7 +31,7 @@ describe("computeForecast - Magic Month Scenario", () => {
 
     const bills: Bill[] = [
       {
-        id: 101,
+        id: "101",
         name: "Rent",
         amount: 2000,
         dueDate: new Date("2026-05-05T00:00:00.000Z"),
@@ -75,9 +77,11 @@ describe("computeForecast - Magic Month Scenario", () => {
     const midMonthToday = new Date("2026-05-14T00:00:00.000Z");
 
     const paySchedule: PaySchedule = {
+      id: "1",
       frequency: "fortnightly",
       inflows: [
         {
+          id: "1",
           amount: 3000,
           date: new Date("2026-05-01T00:00:00.000Z"), // Anchor in past
           label: "Salary",
@@ -87,7 +91,7 @@ describe("computeForecast - Magic Month Scenario", () => {
 
     const bills: Bill[] = [
       {
-        id: 101,
+        id: "101",
         name: "Rent",
         amount: 2000,
         dueDate: new Date("2026-05-05T00:00:00.000Z"), // Already paid
@@ -123,9 +127,11 @@ describe("computeForecast - Magic Month Scenario", () => {
     const today = new Date("2026-05-01T00:00:00.000Z");
 
     const paySchedule: PaySchedule = {
+      id: "1",
       frequency: "fortnightly",
       inflows: [
         {
+          id: "1",
           amount: 3000,
           date: new Date("2026-05-01T00:00:00.000Z"),
           label: "Salary",
@@ -135,7 +141,7 @@ describe("computeForecast - Magic Month Scenario", () => {
 
     const bills: Bill[] = [
       {
-        id: 202,
+        id: "202",
         name: "Car Insurance",
         amount: 1200,
         dueDate: new Date("2025-05-20T00:00:00.000Z"), // 2025 Anchor

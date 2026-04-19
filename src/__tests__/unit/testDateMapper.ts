@@ -5,9 +5,11 @@ describe("testDateMapper", () => {
   it("should correctly transform the dates in the input", () => {
     const forecastInput = {
       paySchedule: {
+        id: "1",
         frequency: "fortnightly",
         inflows: [
           {
+            id: "1",
             amount: 3704.32,
             date: "2026-02-04",
             label: "Salary",
@@ -45,6 +47,7 @@ describe("testDateMapper", () => {
       ],
       commitments: [
         {
+          id: "1",
           commitmentType: "savings",
           commitmentAmount: 1100,
           constraint: "soft",
@@ -52,16 +55,18 @@ describe("testDateMapper", () => {
         },
       ],
       baselines: [
-        { name: "groceries", amount: 300 },
-        { name: "transport", amount: 70 },
+        { id: "1", name: "groceries", amount: 300 },
+        { id: "2", name: "transport", amount: 70 },
       ],
       buffer: 50,
     };
     const transformedInput = transformIntoDTO(forecastInput as unknown);
     const payScheduleV2 = {
+      id: "1",
       frequency: "fortnightly",
       inflows: [
         {
+          id: "1",
           amount: 3704.32,
           date: new Date("2026-02-04"),
           label: "Salary",
@@ -99,6 +104,7 @@ describe("testDateMapper", () => {
     ];
     const commitmentsV2: Commitment[] = [
       {
+        id: "1",
         commitmentType: "savings",
         commitmentAmount: 1100,
         constraint: "soft",
@@ -106,8 +112,8 @@ describe("testDateMapper", () => {
       },
     ];
     const baselinesV2: Baseline[] = [
-      { name: "groceries", amount: 300 },
-      { name: "transport", amount: 70 },
+      { id: "1", name: "groceries", amount: 300 },
+      { id: "2", name: "transport", amount: 70 },
     ];
     const bufferV2: number = 50;
     const expectedTransformedInput = {

@@ -13,11 +13,13 @@ describe("Test timeline generator", () => {
   it("should accurately generate the timeline of events", () => {
     const inflows: Inflow[] = [
       {
+        id: "1",
         amount: 3000.54,
         date: new Date("2026-02-18"),
         label: "Salary",
       },
       {
+        id: "2",
         amount: 690.45,
         date: new Date("2026-02-19"),
         label: "Packaged Salary",
@@ -25,7 +27,7 @@ describe("Test timeline generator", () => {
     ];
     const bills: Bill[] = [
       {
-        id: 256,
+        id: "256",
         name: "Health Insurance",
         amount: 162.76,
         dueDate: new Date("2026-02-28"),
@@ -34,7 +36,7 @@ describe("Test timeline generator", () => {
         payType: "auto-debit",
       },
       {
-        id: 854,
+        id: "854",
         name: "My Fitness Passport",
         amount: 34.78,
         dueDate: new Date("2026-02-27"),
@@ -45,12 +47,14 @@ describe("Test timeline generator", () => {
     ];
     const commitments: Commitment[] = [
       {
+        id: "1",
         commitmentType: "loan",
         commitmentAmount: 600,
         constraint: "hard",
         priority: 1,
       },
       {
+        id: "2",
         commitmentType: "house support",
         commitmentAmount: 300,
         constraint: "soft",
@@ -59,16 +63,19 @@ describe("Test timeline generator", () => {
     ];
     const baselines: Baseline[] = [
       {
+        id: "1",
         name: "Savings",
         amount: 500,
       },
       {
+        id: "2",
         name: "Health",
         amount: 300,
       },
     ];
     const expenses: oneOffExpense[] = [
       {
+        id: "1",
         name: "Car repair",
         amount: 1500,
         date: new Date("2026-02-25"),

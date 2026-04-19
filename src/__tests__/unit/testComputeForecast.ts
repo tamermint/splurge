@@ -17,9 +17,11 @@ describe("computeForecast", () => {
     const date = new Date("2026-02-04T00:00:00.000Z");
 
     const paySchedule: PaySchedule = {
+      id: "001",
       frequency: "fortnightly",
       inflows: [
         {
+          id: "1",
           amount: 3704.32,
           date: new Date("2026-02-04T00:00:00.000Z"),
           label: "Salary",
@@ -29,7 +31,7 @@ describe("computeForecast", () => {
 
     const bills: Bill[] = [
       {
-        id: 1,
+        id: "1",
         name: "Internet",
         amount: 55,
         dueDate: new Date("2026-02-04T00:00:00.000Z"),
@@ -41,6 +43,7 @@ describe("computeForecast", () => {
 
     const commitments: Commitment[] = [
       {
+        id: "1",
         commitmentType: "savings",
         commitmentAmount: 1100,
         constraint: "soft",
@@ -48,8 +51,8 @@ describe("computeForecast", () => {
       },
     ];
     const baselines: Baseline[] = [
-      { name: "groceries", amount: 300 },
-      { name: "transport", amount: 70 },
+      { id: "1", name: "groceries", amount: 300 },
+      { id: "2", name: "transport", amount: 70 },
     ];
 
     const forecastInput: ForecastInput = {
@@ -76,9 +79,11 @@ describe("computeForecast", () => {
     const date = new Date("2026-02-04T00:00:00.000Z");
 
     const paySchedule: PaySchedule = {
+      id: "1",
       frequency: "fortnightly",
       inflows: [
         {
+          id: "1",
           amount: 2000,
           date: new Date("2026-02-04T00:00:00.000Z"),
           label: "Salary",
@@ -88,6 +93,7 @@ describe("computeForecast", () => {
 
     const expenses: oneOffExpense[] = [
       {
+        id: "1",
         name: "Emergency Car Repair",
         amount: 2500, // This is $500 more than the paycheck
         date: new Date("2026-02-10T00:00:00.000Z"),
@@ -96,6 +102,7 @@ describe("computeForecast", () => {
 
     const commitments: Commitment[] = [
       {
+        id: "1",
         commitmentType: "Vacation Fund",
         commitmentAmount: 800,
         constraint: "soft",

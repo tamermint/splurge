@@ -5,7 +5,7 @@ import { Bill, FutureBill } from "@/domain/types/forecast";
 describe("testRecurrenceGenerator", () => {
   it("should correctly return bills in horizon and current date", () => {
     const bill: Bill = {
-      id: 32,
+      id: "32",
       name: "Internet",
       amount: 89.89,
       dueDate: new Date("2026-02-21"),
@@ -42,7 +42,7 @@ describe("testRecurrenceGenerator", () => {
   });
   it("should correctly return bills in month horizon", () => {
     const bill: Bill = {
-      id: 32,
+      id: "32",
       name: "Internet",
       amount: 89.89,
       dueDate: new Date("2026-02-16"),
@@ -95,7 +95,7 @@ describe("testRecurrenceGenerator", () => {
   });
   it("should correctly return bills in year horizon", () => {
     const bill: Bill = {
-      id: 32,
+      id: "32",
       name: "NRMA - Car Insurance",
       amount: 2034.89,
       dueDate: new Date("2025-08-21"),
@@ -148,7 +148,7 @@ describe("testRecurrenceGenerator", () => {
   });
   it("should throw validation errors", () => {
     const validBill: Bill = {
-      id: 1,
+      id: "1",
       name: "test bill",
       amount: 50,
       dueDate: new Date(),

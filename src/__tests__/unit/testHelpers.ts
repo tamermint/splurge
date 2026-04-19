@@ -75,9 +75,11 @@ describe("scheduleHelper", () => {
     it("should return the next payday when fromDate is before payDate", () => {
       const fromDate = new Date("2026-01-15");
       const paySchedule: PaySchedule = {
+        id: "1",
         frequency: "weekly",
         inflows: [
           {
+            id: "1",
             amount: 2000,
             date: new Date("2026-01-20"),
             label: "Salary",
@@ -92,9 +94,11 @@ describe("scheduleHelper", () => {
     it("should skip to next occurrence when fromDate is after payDate", () => {
       const fromDate = new Date("2026-01-25");
       const paySchedule: PaySchedule = {
+        id: "1",
         frequency: "weekly",
         inflows: [
           {
+            id: "1",
             amount: 2000,
             date: new Date("2026-01-20"),
             label: "Salary",
@@ -110,8 +114,10 @@ describe("scheduleHelper", () => {
       const fromDate = new Date("2026-01-20");
       const paySchedule: PaySchedule = {
         frequency: "fortnightly",
+        id: "1",
         inflows: [
           {
+            id: "1",
             amount: 2000,
             date: new Date("2026-01-20"),
             label: "Salary",
@@ -126,9 +132,11 @@ describe("scheduleHelper", () => {
     it("should throw DateMappingError when fromDate is invalid", () => {
       const invalidDate = new Date("invalid");
       const paySchedule: PaySchedule = {
+        id: "1",
         frequency: "weekly",
         inflows: [
           {
+            id: "1",
             amount: 2000,
             date: new Date("2026-01-20"),
             label: "Salary",
@@ -160,7 +168,7 @@ describe("scheduleHelper", () => {
       const endDate: Date = new Date("2026-03-10");
       const bills: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-02-02"),
@@ -180,7 +188,7 @@ describe("scheduleHelper", () => {
       const expectedBillAmount: number = 55;
       const expectedBillOccurence: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-01-27"),
@@ -191,7 +199,7 @@ describe("scheduleHelper", () => {
       ];
       const bills: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-01-27"),
@@ -200,7 +208,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 2,
+          id: "2",
           name: "Insurance",
           amount: 162.75,
           dueDate: new Date("2026-01-28"),
@@ -209,7 +217,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 54,
+          id: "54",
           name: "Gym membership",
           amount: 34.38,
           dueDate: new Date("2026-01-31"),
@@ -218,7 +226,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 27,
+          id: "27",
           name: "Amazon prime membership",
           amount: 9.99,
           dueDate: new Date("2026-02-10"),
@@ -237,7 +245,7 @@ describe("scheduleHelper", () => {
       const expectedBillAmount: number = 55;
       const expectedBillOccurence: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-02-02"),
@@ -248,7 +256,7 @@ describe("scheduleHelper", () => {
       ];
       const bills: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-02-02"),
@@ -257,7 +265,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 2,
+          id: "2",
           name: "Insurance",
           amount: 162.75,
           dueDate: new Date("2026-02-18"),
@@ -266,7 +274,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 54,
+          id: "54",
           name: "Gym membership",
           amount: 34.38,
           dueDate: new Date("2026-02-06"),
@@ -275,7 +283,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 27,
+          id: "27",
           name: "Amazon prime membership",
           amount: 9.99,
           dueDate: new Date("2026-02-10"),
@@ -294,7 +302,7 @@ describe("scheduleHelper", () => {
       const expectedBillAmount: number = 262.12;
       const expectedBillOccurence: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-02-02"),
@@ -303,7 +311,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 2,
+          id: "2",
           name: "Insurance",
           amount: 162.75,
           dueDate: new Date("2026-02-17"),
@@ -312,7 +320,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 54,
+          id: "54",
           name: "Gym membership",
           amount: 34.38,
           dueDate: new Date("2026-02-06"),
@@ -321,7 +329,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 27,
+          id: "27",
           name: "Amazon prime membership",
           amount: 9.99,
           dueDate: new Date("2026-02-10"),
@@ -332,7 +340,7 @@ describe("scheduleHelper", () => {
       ];
       const bills: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-02-02"),
@@ -341,7 +349,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 2,
+          id: "2",
           name: "Insurance",
           amount: 162.75,
           dueDate: new Date("2026-02-17"),
@@ -350,7 +358,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 54,
+          id: "54",
           name: "Gym membership",
           amount: 34.38,
           dueDate: new Date("2026-02-06"),
@@ -359,7 +367,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 27,
+          id: "27",
           name: "Amazon prime membership",
           amount: 9.99,
           dueDate: new Date("2026-02-10"),
@@ -378,7 +386,7 @@ describe("scheduleHelper", () => {
       const expectedBillAmount: number = 55;
       const expectedBillOccurence: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-01-20"),
@@ -389,7 +397,7 @@ describe("scheduleHelper", () => {
       ];
       const bills: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-01-20"),
@@ -398,7 +406,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 2,
+          id: "2",
           name: "Insurance",
           amount: 162.75,
           dueDate: new Date("2026-02-18"),
@@ -407,7 +415,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 54,
+          id: "54",
           name: "Gym membership",
           amount: 34.38,
           dueDate: new Date("2026-02-06"),
@@ -416,7 +424,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         },
         {
-          id: 27,
+          id: "27",
           name: "Amazon prime membership",
           amount: 9.99,
           dueDate: new Date("2026-02-10"),
@@ -450,7 +458,7 @@ describe("scheduleHelper", () => {
       const endDate: Date = new Date("2026-01-29");
       const bills: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-01-20"),
@@ -468,7 +476,7 @@ describe("scheduleHelper", () => {
       const endDate: Date = new Date("invalid");
       const bills: Bill[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-01-20"),
@@ -486,7 +494,7 @@ describe("scheduleHelper", () => {
       const endDate: Date = new Date("2026-01-29");
       const bills = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           // dueDate is missing
@@ -506,7 +514,7 @@ describe("scheduleHelper", () => {
       const endDate: Date = new Date("2026-01-29");
       const bills = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("invalid"), // This is a Date object with NaN
@@ -564,7 +572,7 @@ describe("scheduleHelper", () => {
       const endDate: Date = new Date("2026-02-04");
       const mixedBills: (Bill | FutureBill)[] = [
         {
-          id: 1,
+          id: "1",
           name: "Internet",
           amount: 55,
           dueDate: new Date("2026-02-02"),
@@ -581,7 +589,7 @@ describe("scheduleHelper", () => {
           payType: "auto-debit",
         } as FutureBill,
         {
-          id: 2,
+          id: "2",
           name: "Insurance",
           amount: 162.75,
           dueDate: new Date("2026-02-18"),

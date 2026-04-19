@@ -5,9 +5,11 @@ import { DateMappingError, ValidationError } from "@/lib/errors";
 describe("testInflowGenerator", () => {
   it("should throw error if start date is invalid", () => {
     const paySchedule: PaySchedule = {
+      id: "1",
       frequency: "fortnightly",
       inflows: [
         {
+          id: "1",
           amount: 3500,
           date: new Date("2026-03-04"),
           label: "primary pay",
@@ -22,9 +24,11 @@ describe("testInflowGenerator", () => {
   });
   it("should throw error if end date is invalid", () => {
     const paySchedule: PaySchedule = {
+      id: "1",
       frequency: "fortnightly",
       inflows: [
         {
+          id: "1",
           amount: 3500,
           date: new Date("2026-03-04"),
           label: "primary pay",
@@ -39,6 +43,7 @@ describe("testInflowGenerator", () => {
   });
   it("should throw validation error if inflows is empty", () => {
     const paySchedule: PaySchedule = {
+      id: "1",
       frequency: "fortnightly",
       inflows: [],
     };
@@ -50,6 +55,7 @@ describe("testInflowGenerator", () => {
   });
   it("should throw validation error if frequency is invalid", () => {
     const paySchedule: PaySchedule = {
+      id: "1",
       frequency: "" as unknown as "weekly" | "fortnightly" | "monthly",
       inflows: [],
     };
@@ -61,9 +67,11 @@ describe("testInflowGenerator", () => {
   });
   it("should return valid sorted inflow occurrences with non-packaged pay", () => {
     const paySchedule: PaySchedule = {
+      id: "1",
       frequency: "fortnightly",
       inflows: [
         {
+          id: "1",
           amount: 3000.54,
           date: new Date("2026-02-18"),
           label: "Salary",
@@ -79,6 +87,7 @@ describe("testInflowGenerator", () => {
     );
     const expectedResult: Inflow[] = [
       {
+        id: "1",
         amount: 3000.54,
         date: new Date("2026-02-18"),
         label: "Salary",
@@ -88,14 +97,17 @@ describe("testInflowGenerator", () => {
   });
   it("should return valid sorted inflow occurrences with packaged pay", () => {
     const paySchedule: PaySchedule = {
+      id: "1",
       frequency: "fortnightly",
       inflows: [
         {
+          id: "1",
           amount: 3000.54,
           date: new Date("2026-02-18"),
           label: "Salary",
         },
         {
+          id: "2",
           amount: 690.45,
           date: new Date("2026-02-19"),
           label: "Packaged Salary",
@@ -111,11 +123,13 @@ describe("testInflowGenerator", () => {
     );
     const expectedResult: Inflow[] = [
       {
+        id: "1",
         amount: 3000.54,
         date: new Date("2026-02-18"),
         label: "Salary",
       },
       {
+        id: "2",
         amount: 690.45,
         date: new Date("2026-02-19"),
         label: "Packaged Salary",
@@ -125,14 +139,17 @@ describe("testInflowGenerator", () => {
   });
   it("should return valid sorted inflow occurrences with packaged pay extended range", () => {
     const paySchedule: PaySchedule = {
+      id: "1",
       frequency: "fortnightly",
       inflows: [
         {
+          id: "1",
           amount: 3000.54,
           date: new Date("2026-02-18"),
           label: "Salary",
         },
         {
+          id: "2",
           amount: 690.45,
           date: new Date("2026-02-19"),
           label: "Packaged Salary",
@@ -148,56 +165,67 @@ describe("testInflowGenerator", () => {
     );
     const expectedResult: Inflow[] = [
       {
+        id: "1",
         amount: 3000.54,
         date: new Date("2026-02-18"),
         label: "Salary",
       },
       {
+        id: "2",
         amount: 690.45,
         date: new Date("2026-02-19"),
         label: "Packaged Salary",
       },
       {
+        id: "1",
         amount: 3000.54,
         date: new Date("2026-03-04"),
         label: "Salary",
       },
       {
+        id: "2",
         amount: 690.45,
         date: new Date("2026-03-05"),
         label: "Packaged Salary",
       },
       {
+        id: "1",
         amount: 3000.54,
         date: new Date("2026-03-18"),
         label: "Salary",
       },
       {
+        id: "2",
         amount: 690.45,
         date: new Date("2026-03-19"),
         label: "Packaged Salary",
       },
       {
+        id: "1",
         amount: 3000.54,
         date: new Date("2026-04-01"),
         label: "Salary",
       },
       {
+        id: "2",
         amount: 690.45,
         date: new Date("2026-04-02"),
         label: "Packaged Salary",
       },
       {
+        id: "1",
         amount: 3000.54,
         date: new Date("2026-04-15"),
         label: "Salary",
       },
       {
+        id: "2",
         amount: 690.45,
         date: new Date("2026-04-16"),
         label: "Packaged Salary",
       },
       {
+        id: "1",
         amount: 3000.54,
         date: new Date("2026-04-29"),
         label: "Salary",
