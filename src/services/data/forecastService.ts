@@ -12,7 +12,7 @@ import {
   ForecastInputSchema,
 } from "@/domain/types/forecast";
 import { Prisma } from "@/generated/prisma/client";
-import { IncompleteUser, InvalidUser, ValidationError } from "@/lib/errors";
+import { IncompleteUser, InvalidUser } from "@/lib/errors";
 import prisma from "@/lib/prisma";
 
 const userFinancialGraph = {

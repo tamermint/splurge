@@ -54,7 +54,7 @@ function buildRateLimitResponse(
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const pathname = request.nextUrl.pathname;
   const session = await auth();
-  let userId = session?.user?.id;
+  const userId = session?.user?.id;
   let userPlan = "FREE";
   if (userId) {
     userPlan = (session?.user as any).plan;
