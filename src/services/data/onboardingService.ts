@@ -1,59 +1,5 @@
-import { Frequency, ScheduleType } from "@/generated/prisma/enums";
+import { OnboardingPayload } from "@/domain/types/forecast";
 import prisma from "@/lib/prisma";
-import z from "zod";
-
-const OnboardingPayloadSchema = z.object({
-  startingBalance: z.number(),
-  buffer: z.number(),
-  paySchedule: z.object({
-    id: z.uuidv4(), // Client-minted ID
-    frequency: z.enum(Frequency),
-    inflows: z.array(
-      z.object({
-        id: z.uuidv4(),
-        amount: z.number(),
-        date: z.coerce.date(),
-        label: z.string(),
-      }),
-    ),
-  }),
-  bills: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      amount: z.number(),
-      dueDate: z.coerce.date(),
-      scheduleType: z.enum(ScheduleType),
-      payRail: z.string(),
-      payType: z.literal(["auto-debit", "manual"]),
-    }),
-  ),
-  commitments: z.array(
-    z.object({
-      id: z.string(),
-      commitmentType: z.string(),
-      commitmentAmount: z.number(),
-      constraint: z.literal(["hard", "soft"]),
-      priority: z.number(),
-    }),
-  ),
-  baselines: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      amount: z.number(),
-    }),
-  ),
-  expenses: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      amount: z.number(),
-      date: z.coerce.date(),
-    }),
-  ),
-});
-export type OnboardingPayload = z.infer<typeof OnboardingPayloadSchema>;
 
 export async function intializeUserWithFiancials(
   userId: string,
@@ -114,6 +60,7 @@ export async function intializeUserWithFiancials(
           date: expense.date,
         })),
       },
+      plan: "FREE",
     },
   });
   return updatedUser;

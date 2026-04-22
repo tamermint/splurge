@@ -1,8 +1,11 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { ipAddress } from "@vercel/functions";
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import authConfig from "./lib/auth.config";
+
+const { auth } = NextAuth(authConfig);
 
 const redisURL = process.env.UPSTASH_REDIS_REST_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -50,20 +53,21 @@ function buildRateLimitResponse(
     },
   );
 }
-
-export async function proxy(request: NextRequest): Promise<NextResponse> {
+//The type inference needs to be automatically deduced from the request. The auth wrapper will return a NextAuthRequest which will return a session in the request
+export const proxy = auth(async function proxy(request) {
   const pathname = request.nextUrl.pathname;
-  const session = await auth();
+  const session = request.auth;
   const userId = session?.user?.id;
   let userPlan = "FREE";
   if (userId) {
-    userPlan = (session?.user as any).plan;
+    userPlan = session.user.plan;
   }
   const identifier = userId ?? ipAddress(request) ?? "anonymous";
   if (!userId) {
     if (
       pathname.startsWith("/api/forecast") ||
-      pathname.startsWith("/api/insights")
+      pathname.startsWith("/api/insights") ||
+      pathname.startsWith("/api/onboarding")
     ) {
       return NextResponse.json(
         {
@@ -81,7 +85,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
       if (!success) {
         const message = "Anonymous user throttled";
-        buildRateLimitResponse(limit, remaining, reset, message);
+        return buildRateLimitResponse(limit, remaining, reset, message);
       } else return NextResponse.next();
     }
   }
@@ -102,13 +106,14 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     }
     if (
       pathname.startsWith("/api/teaser") ||
-      pathname.startsWith("/api/forecast")
+      pathname.startsWith("/api/forecast") ||
+      pathname.startsWith("/api/onboarding")
     ) {
       const { success, limit, remaining, reset } =
         await rateLimiter.anonymous.limit(identifier);
       if (!success) {
         const message = "Unlock higher limits with pro membership!";
-        buildRateLimitResponse(limit, remaining, reset, message);
+        return buildRateLimitResponse(limit, remaining, reset, message);
       } else return NextResponse.next();
     }
   }
@@ -119,12 +124,13 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     return response;
   }
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
     "/api/forecast/:path*",
     "/api/insights/:path*",
     "/api/teaser/:path*",
+    "/api/onboarding/:path*",
   ],
 };

@@ -1,4 +1,59 @@
 import { z } from "zod";
+import { Frequency, Plan, ScheduleType } from "@/generated/prisma/enums";
+
+export const OnboardingPayloadSchema = z.object({
+  startingBalance: z.number(),
+  buffer: z.number(),
+  paySchedule: z.object({
+    id: z.uuidv4(), // Client-minted ID
+    frequency: z.enum(Frequency),
+    inflows: z.array(
+      z.object({
+        id: z.uuidv4(),
+        amount: z.number(),
+        date: z.coerce.date(),
+        label: z.string(),
+      }),
+    ),
+  }),
+  bills: z.array(
+    z.object({
+      id: z.uuidv4(),
+      name: z.string(),
+      amount: z.number(),
+      dueDate: z.coerce.date(),
+      scheduleType: z.enum(ScheduleType),
+      payRail: z.string(),
+      payType: z.enum(["auto-debit", "manual"]),
+    }),
+  ),
+  commitments: z.array(
+    z.object({
+      id: z.uuidv4(),
+      commitmentType: z.string(),
+      commitmentAmount: z.number(),
+      constraint: z.enum(["hard", "soft"]),
+      priority: z.number(),
+    }),
+  ),
+  baselines: z.array(
+    z.object({
+      id: z.uuidv4(),
+      name: z.string(),
+      amount: z.number(),
+    }),
+  ),
+  expenses: z.array(
+    z.object({
+      id: z.uuidv4(),
+      name: z.string(),
+      amount: z.number(),
+      date: z.coerce.date(),
+    }),
+  ),
+  plan: z.enum(Plan),
+});
+export type OnboardingPayload = z.infer<typeof OnboardingPayloadSchema>;
 
 /**
  * @typedef {Object} TimelineEvent
