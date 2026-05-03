@@ -34,7 +34,7 @@ export type UserWithFinancials = Prisma.UserGetPayload<{
 export async function getForecastInputOfUser(
   userId: string,
   overrides?: ForecastOverrides,
-): Promise<ForecastInput | null> {
+): Promise<ForecastInput> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: userFinancialGraph,
@@ -79,9 +79,9 @@ function buildDomainInput(
 ): ForecastInput {
   //Build the domain input
   //get other values such as buffer
-  const dbBuffer: number = dbUser.buffer;
-  const dbPaySchedule: PaySchedule = dbUser.paySchedule as PaySchedule;
-  const dbStartingBalance: number = dbUser.startingBalance as number;
+  const dbBuffer = dbUser.buffer as number;
+  const dbPaySchedule = dbUser.paySchedule as PaySchedule;
+  const dbStartingBalance = dbUser.startingBalance as number;
   //map the bills
   const mappedDbBills: Bill[] = dbUser.bills.map((b) => ({
     id: b.id,

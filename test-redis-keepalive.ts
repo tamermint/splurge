@@ -11,9 +11,10 @@ const redis = new Redis({
 });
 
 // string
-await redis.set("key", "value");
-let data = await redis.get("key");
+await redis.set("foo", "bar");
+let data = await redis.get("foo");
 console.log(data);
+await redis.del("key");
 
 await redis.set("key2", "value2", { ex: 1 });
 
@@ -23,7 +24,7 @@ data = await redis.zrange("scores", 0, 100);
 console.log(data);
 
 // list
-await redis.lpush("elements", "magnesium");
+await redis.lpush("elements", "uranium");
 data = await redis.lrange("elements", 0, 100);
 console.log(data);
 

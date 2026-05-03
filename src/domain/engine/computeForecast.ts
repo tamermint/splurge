@@ -64,10 +64,10 @@ import { calculateStructuralDeficit } from "./calculateStructuralDeficit";
  *   buffer: 50
  * }, new Date("2025-02-10"));
  */
-export async function computeForecast(
+export function computeForecast(
   input: ForecastInput,
   today: Date,
-): Promise<ForecastOutput> {
+): ForecastOutput {
   // ============================================================================
   // STEP 1: Extract and Aggregate Input Components
   // ============================================================================
