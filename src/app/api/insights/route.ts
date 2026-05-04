@@ -1,6 +1,20 @@
-import { ForecastOutput, ForecastOutputSchema } from "@/domain/types/forecast";
-import { ForecastError } from "@/lib/errors";
+import { computeForecast } from "@/domain/engine/computeForecast";
+import {
+  ForecastInput,
+  ForecastOutput,
+  ForecastOutputSchema,
+  ForecastOverrides,
+  ForecastOverrideSchema,
+} from "@/domain/types/forecast";
+import { auth } from "@/lib/auth";
+import {
+  ForecastError,
+  IncompleteUser,
+  InvalidUser,
+  ValidationError,
+} from "@/lib/errors";
 import { generateSplurgeInsights } from "@/services/ai/aiInsights";
+import { getForecastInputOfUser } from "@/services/data/forecastService";
 import { NextResponse } from "next/server";
 import z from "zod";
 
@@ -18,26 +32,56 @@ import z from "zod";
  * * @throws {ForecastError} Caught and mapped to a 400 status for handled domain exceptions.
  */
 
-export async function POST(req: Request): Promise<NextResponse> {
+export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const body = await req.json();
-    const rawForecast = body.data ?? body;
-
-    const validation = ForecastOutputSchema.safeParse(rawForecast);
-
-    if (!validation.success) {
+    const session = await auth();
+    if (!session?.user.id) {
       return NextResponse.json(
         {
           success: false,
-          error: "Invalid forecast data structure for AI analysis",
-          details: z.treeifyError(validation.error),
+          error: "Unauthorised access!",
+          type: "auth_error",
         },
-        { status: 400 },
+        {
+          status: 401,
+        },
       );
     }
+    const userId = session.user.id;
+    //extract the overrides
+    let overrides: ForecastOverrides = {};
+    try {
+      const text = await request.text();
+      if (text) {
+        const rawJson = JSON.parse(text);
+        const parsed = ForecastOverrideSchema.safeParse(rawJson);
 
-    const forecast: ForecastOutput = validation.data;
-    const insights = await generateSplurgeInsights(forecast);
+        if (!parsed.success) {
+          const formattedErrors = z.prettifyError(parsed.error);
+          throw new ValidationError(`Validation failed: ${formattedErrors}`);
+        }
+
+        overrides = parsed.data;
+      }
+    } catch (error: unknown) {
+      if (error instanceof ValidationError) {
+        throw error;
+      }
+      throw new ValidationError("Invalid JSON Payload for overrides");
+    }
+
+    //build the domain input
+    const domainInput: ForecastInput = await getForecastInputOfUser(
+      userId,
+      overrides,
+    );
+
+    //recompute the forecast with today's date
+    const today: Date = new Date();
+    const forecastOutput: ForecastOutput = computeForecast(domainInput, today);
+
+    //generate insights
+    const insights = await generateSplurgeInsights(forecastOutput);
 
     return NextResponse.json({ success: true, insights });
   } catch (error: unknown) {
@@ -47,6 +91,14 @@ export async function POST(req: Request): Promise<NextResponse> {
     if (error instanceof ForecastError) {
       status = 400;
       type = "forecast_error";
+      message = error.message;
+    } else if (error instanceof IncompleteUser) {
+      status = 400;
+      type = "incomplete_user_error";
+      message = error.message;
+    } else if (error instanceof InvalidUser) {
+      status = 404;
+      type = "invalid_user_error";
       message = error.message;
     } else if (error instanceof Error) {
       message = error.message;
