@@ -1,10 +1,18 @@
 import "server-only";
-import { GoogleGenAI } from "@google/genai";
-import { ForecastOutput, TrimmedForecastOutput } from "@/domain/types/forecast";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
+import { generateText, Output } from "ai";
+import { google, type GoogleLanguageModelOptions } from "@ai-sdk/google";
+import { zodSchema } from "ai";
+import {
+  ForecastOutput,
+  ForecastOverrideSchema,
+  TrimmedForecastOutput,
+} from "@/domain/types/forecast";
 import fs from "fs";
 import path from "path";
 import { ForecastError, ValidationError } from "@/lib/errors";
 import { trimForecastOutputForAI } from "./forecastOutputTrimmer";
+import z from "zod";
 
 /**
  * @module services/ai/aiInsights
@@ -29,16 +37,27 @@ import { trimForecastOutputForAI } from "./forecastOutputTrimmer";
  * @throws {ForecastError} If the GenAI SDK fails or the model returns an empty sequence.
  */
 
+export const AIActionPlanSchema = z.object({
+  coachMessage: z
+    .string()
+    .describe(
+      "The markdown-formatted strategic briefing and advice from the AI coach.",
+    ),
+  suggestedOverrides: ForecastOverrideSchema.describe(
+    "The strict JSON modifications to apply to the user's financial state. Leave as an empty object {} if no changes are required.",
+  ),
+});
+
+export type AIActionPlan = z.infer<typeof AIActionPlanSchema>;
+
 export async function generateSplurgeInsights(
   forecast: ForecastOutput,
 ): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.AI_GATEWAY_API_KEY;
 
   if (!apiKey) {
     throw new ValidationError("AI API key is not defined in the environment");
   }
-
-  const client = new GoogleGenAI({ apiKey });
 
   const trimmedForecastOutput: TrimmedForecastOutput =
     trimForecastOutputForAI(forecast);
@@ -50,26 +69,31 @@ export async function generateSplurgeInsights(
 
   const systemInstructions = fs.readFileSync(promptPath, "utf-8");
   try {
-    const result = await client.models.generateContent({
-      model: "gemini-2.5-pro",
-      config: {
-        systemInstruction: systemInstructions,
-        temperature: 0.0,
-        topP: 0,
-        topK: 1,
-      },
-      contents: [
-        {
-          role: "user",
-          parts: [
+    const { text } = await generateText({
+      model: "google/gemini-2.5-pro",
+      system: systemInstructions,
+      topP: 0,
+      topK: 1,
+      temperature: 0.0,
+      prompt: `Analyze this sequence: ${JSON.stringify(trimmedForecastOutput)}`,
+      providerOptions: {
+        google: {
+          thinkingConfig: {
+            thinkingLevel: "high",
+          },
+          safetySettings: [
             {
-              text: `Analyze this sequence: ${JSON.stringify(trimmedForecastOutput)}`,
+              category: "HARM_CATEGORY_UNSPECIFIED",
+              threshold: "BLOCK_LOW_AND_ABOVE",
             },
           ],
-        },
-      ],
+        } satisfies GoogleLanguageModelOptions,
+      },
+      output: Output.object({
+        schema: AIActionPlanSchema,
+      }),
     });
-    return result.text || "";
+    return text || "";
   } catch (error) {
     console.error("Gemini SDK error: ", error);
     throw new ForecastError("Strategic Analysis failed");

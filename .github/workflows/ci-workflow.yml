@@ -68,7 +68,7 @@ jobs:
       - name: Build
         run: pnpm build
         env:
-          GEMINI_API_KEY: ${{'build_dummy_key'}}
+          AI_GATEWAY_API_KEY: ${{'build_dummy_key'}}
 
       # Step 12: Start the server
       - name: Start production server

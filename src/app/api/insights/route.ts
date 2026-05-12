@@ -2,7 +2,6 @@ import { computeForecast } from "@/domain/engine/computeForecast";
 import {
   ForecastInput,
   ForecastOutput,
-  ForecastOutputSchema,
   ForecastOverrides,
   ForecastOverrideSchema,
 } from "@/domain/types/forecast";
