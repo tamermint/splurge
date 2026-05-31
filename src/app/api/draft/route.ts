@@ -7,7 +7,36 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
-export async function draftDelete(): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
+  try {
+    const session = await auth();
+    if (!session?.user.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorised access!",
+          type: "auth_error",
+        },
+        {
+          status: 401,
+        },
+      );
+    }
+    const userId = session.user.id;
+
+    const draftKey = `splurge:draft:${userId}`;
+    const data = await redis.get(draftKey);
+
+    return NextResponse.json({ success: true, data });
+  } catch (error: unknown) {
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch draft" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(): Promise<NextResponse> {
   try {
     const session = await auth();
     if (!session?.user.id) {
