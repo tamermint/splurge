@@ -1,5 +1,4 @@
 import "server-only";
-import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { generateText, Output } from "ai";
 import { google, type GoogleLanguageModelOptions } from "@ai-sdk/google";
 import { zodSchema } from "ai";
@@ -37,7 +36,7 @@ import z from "zod";
  * @throws {ForecastError} If the GenAI SDK fails or the model returns an empty sequence.
  */
 
-export const AIActionPlanSchema = z.object({
+export const BaseAIActionPlanSchema = z.object({
   coachMessage: z
     .string()
     .describe(
@@ -48,11 +47,13 @@ export const AIActionPlanSchema = z.object({
   ),
 });
 
-export type AIActionPlan = z.infer<typeof AIActionPlanSchema>;
+export type AIActionPlan = z.infer<typeof BaseAIActionPlanSchema>;
+
+export const AIActionPlanSchema = zodSchema(BaseAIActionPlanSchema);
 
 export async function generateSplurgeInsights(
   forecast: ForecastOutput,
-): Promise<string> {
+): Promise<AIActionPlan> {
   const apiKey = process.env.AI_GATEWAY_API_KEY;
 
   if (!apiKey) {
@@ -69,8 +70,8 @@ export async function generateSplurgeInsights(
 
   const systemInstructions = fs.readFileSync(promptPath, "utf-8");
   try {
-    const { text } = await generateText({
-      model: "google/gemini-2.5-pro",
+    const { text, output } = await generateText({
+      model: google("gemini-2.5-pro"),
       system: systemInstructions,
       topP: 0,
       topK: 1,
@@ -90,10 +91,17 @@ export async function generateSplurgeInsights(
         } satisfies GoogleLanguageModelOptions,
       },
       output: Output.object({
-        schema: AIActionPlanSchema,
+        schema: BaseAIActionPlanSchema,
       }),
     });
-    return text || "";
+    if (output) {
+      return output as AIActionPlan;
+    }
+    if (text) {
+      return JSON.parse(text) as AIActionPlan;
+    }
+
+    throw new Error("No output generated");
   } catch (error) {
     console.error("Gemini SDK error: ", error);
     throw new ForecastError("Strategic Analysis failed");
