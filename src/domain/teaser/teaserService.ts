@@ -56,10 +56,7 @@ export async function forecastTeaser(input: TeaserInput) {
     startingBalance: currentBalance,
   };
 
-  const forecast: ForecastOutput = await computeForecast(
-    synthInput,
-    new Date(),
-  );
+  const forecast: ForecastOutput = computeForecast(synthInput, new Date());
 
   const insights = await generateTeaserInsights(forecast);
 
