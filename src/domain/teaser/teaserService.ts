@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { computeForecast } from "../engine/computeForecast";
 import { ForecastInput, ForecastOutput, TeaserInput } from "../types/forecast";
 import { generateTeaserInsights } from "./teaserAIInsights";
@@ -16,9 +17,11 @@ export async function forecastTeaser(input: TeaserInput) {
   //Building a synthetic input
   const synthInput: ForecastInput = {
     paySchedule: {
+      id: randomUUID(),
       frequency: "monthly",
       inflows: [
         {
+          id: randomUUID(),
           amount: monthlyIncome,
           date: new Date(new Date().setDate(new Date().getDate() + 14)),
           label: "Estimated Salary",
@@ -27,7 +30,7 @@ export async function forecastTeaser(input: TeaserInput) {
     },
     bills: [
       {
-        id: 999,
+        id: randomUUID(),
         name: "Monthly obligations",
         amount: totalMonthlyBills,
         dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
@@ -42,6 +45,7 @@ export async function forecastTeaser(input: TeaserInput) {
       targetSplurge > 0
         ? [
             {
+              id: randomUUID(),
               name: "Desired Splurge",
               amount: targetSplurge,
               date: new Date(),
