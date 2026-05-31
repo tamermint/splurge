@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "test": "jest",
     "test-redis-script": "tsx --env-file=.env.local ./test-redis-keepalive.ts"
   },
