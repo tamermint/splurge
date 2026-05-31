@@ -16,6 +16,7 @@ import { generateSplurgeInsights } from "@/services/ai/aiInsights";
 import { getForecastInputOfUser } from "@/services/data/forecastService";
 import { NextResponse } from "next/server";
 import z from "zod";
+import { Redis } from "@upstash/redis";
 
 /**
  * @module api/insights/route
@@ -30,6 +31,11 @@ import z from "zod";
  * - **500 Internal Error:** Returns a `system_error` for unhandled runtime exceptions.
  * * @throws {ForecastError} Caught and mapped to a 400 status for handled domain exceptions.
  */
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -81,6 +87,16 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     //generate insights
     const insights = await generateSplurgeInsights(forecastOutput);
+
+    //Redis injection
+    if (
+      insights.suggestedOverrides &&
+      Object.keys(insights.suggestedOverrides).length > 0
+    ) {
+      const draftKey = `splurge:draft:${userId}`;
+
+      await redis.set(draftKey, JSON.stringify(insights.suggestedOverrides));
+    }
 
     return NextResponse.json({ success: true, insights });
   } catch (error: unknown) {
