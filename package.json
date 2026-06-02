@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "test": "jest",
+    "test": "jest --forceExit --detectOpenHandles",
     "test-redis-script": "tsx --env-file=.env.local ./test-redis-keepalive.ts"
   },
   "dependencies": {
@@ -29,7 +29,6 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "server-only": "^0.0.1",
-    "ts-jest": "^29.4.9",
     "zod": "^4.3.6"
   },
   "devDependencies": {

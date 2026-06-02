@@ -1,25 +1,18 @@
-module.exports = {
-  preset: "ts-jest",
+const nextJest = require("next/jest");
+
+const createJestConfig = nextJest({
+  dir: "./",
+});
+
+/** @type {import('jest').Config} */
+const customJestConfig = {
   testEnvironment: "node",
-  roots: ["<rootDir>/src"],
-  testMatch: ["**/__tests__/**/*.ts", "**/?(*).test.ts"],
   moduleNameMapper: {
-    // Mock the server-only marker to a no-op
+    // 1. Mock the server-only marker
     "^server-only$": "<rootDir>/src/__mocks__/emptyMock.ts",
-    // Priority 1: Specific Prisma Alias
+    // 2. Explicitly map your custom Prisma client path
     "^@/prisma-client$": "<rootDir>/src/generated/prisma",
-    // Priority 2: General src Alias
-    "^@/(.*)$": "<rootDir>/src/$1",
-  },
-  transform: {
-    "^.+\\.tsx?$": [
-      "ts-jest",
-      {
-        tsconfig: {
-          // Ensure this points to your project tsconfig
-          jsx: "react-jsx",
-        },
-      },
-    ],
   },
 };
+
+module.exports = createJestConfig(customJestConfig);
