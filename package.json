@@ -22,14 +22,18 @@
     "@upstash/redis": "^1.37.0",
     "@vercel/functions": "^3.4.3",
     "ai": "^6.0.174",
+    "clsx": "^2.1.1",
     "dotenv": "^17.3.1",
+    "lucide-react": "^1.17.0",
     "next": "16.1.3",
     "next-auth": "5.0.0-beta.30",
     "pg": "^8.20.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "server-only": "^0.0.1",
-    "zod": "^4.3.6"
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
