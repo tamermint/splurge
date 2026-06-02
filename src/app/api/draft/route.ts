@@ -29,9 +29,13 @@ export async function GET(): Promise<NextResponse> {
 
     return NextResponse.json({ success: true, data });
   } catch (error: unknown) {
+    const status = 500;
+    const type = "system_error";
+    const message = "An unexpected error occurred";
+    console.error(error);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch draft" },
-      { status: 500 },
+      { success: false, error: message, type },
+      { status },
     );
   }
 }
@@ -58,9 +62,13 @@ export async function DELETE(): Promise<NextResponse> {
 
     return NextResponse.json({ success: true, message: "Draft Discarded!" });
   } catch (error: unknown) {
+    const status = 500;
+    const type = "system_error";
+    const message = "An unexpected error occurred";
+    console.error(error);
     return NextResponse.json(
-      { success: false, error: "Failed to delete draft" },
-      { status: 500 },
+      { success: false, error: message, type },
+      { status },
     );
   }
 }
