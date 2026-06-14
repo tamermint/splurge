@@ -1,26 +1,15 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@utility base {
+  body {
+    /* The deep void background */
+    @apply bg-[#0B0C10] text-slate-100 antialiased selection:bg-indigo-500/30;
+    /* Prevent overscroll bounce showing white on mobile */
+    overscroll-behavior-y: none;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Force tabular numbers globally so glowing balances never jitter */
+  .tabular-numbers {
+    font-variant-numeric: tabular-nums;
+  }
 }

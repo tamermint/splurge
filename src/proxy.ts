@@ -62,7 +62,10 @@ export const proxy = auth(async function proxy(request) {
   if (userId) {
     userPlan = session.user.plan;
   }
-  const identifier = userId ?? ipAddress(request) ?? "anonymous";
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const parsedIp = forwardedFor ? forwardedFor.split(",")[0].trim() : undefined;
+
+  const identifier = userId ?? parsedIp ?? ipAddress(request) ?? "anonymous";
   if (!userId) {
     if (
       pathname.startsWith("/api/forecast") ||

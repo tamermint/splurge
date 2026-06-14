@@ -10,7 +10,8 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "test": "jest --forceExit --detectOpenHandles",
-    "test-redis-script": "tsx --env-file=.env.local ./test-redis-keepalive.ts"
+    "test-redis-script": "tsx --env-file=.env.local ./test-redis-keepalive.ts",
+    "test:integration": "playwright test"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.67",
@@ -36,6 +37,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

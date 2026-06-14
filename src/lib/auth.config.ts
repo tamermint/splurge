@@ -5,6 +5,7 @@
 //This is the edge runtime safe config
 
 import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig, DefaultSession } from "next-auth";
 import { Plan } from "@/generated/prisma/enums";
 import "next-auth/jwt";
@@ -29,8 +30,31 @@ declare module "next-auth/jwt" {
   }
 }
 
+const providers: any[] = [Google];
+
+if (process.env.NEXT_PUBLIC_TEST_MODE === "true") {
+  providers.push(
+    Credentials({
+      id: "test-credentials",
+      name: "Test Credentials",
+      credentials: {
+        id: { label: "ID", type: "text" },
+        plan: { label: "Plan", type: "text" },
+      },
+      authorize: async (credentials) => {
+        return {
+          id: credentials.id as string,
+          plan: (credentials.plan as Plan) || "FREE",
+          name: "Test User",
+          email: `test-${credentials.id}@splurge.local`,
+        };
+      },
+    }),
+  );
+}
+
 export default {
-  providers: [Google],
+  providers,
   callbacks: {
     jwt({ token, user }) {
       if (user) {
