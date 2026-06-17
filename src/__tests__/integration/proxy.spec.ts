@@ -99,7 +99,6 @@ test.describe("Proxy tests", () => {
         const response = await request.post(route, { data: {} });
         expect(response.status()).not.toBe(429);
       }
-
       const softThrottleRes = await request.get(route);
       expect(softThrottleRes.status()).not.toBe(429);
       expect(softThrottleRes.headers()["x-splurge-ai-throttle"]).toBe("true");
