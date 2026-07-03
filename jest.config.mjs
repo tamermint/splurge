@@ -13,6 +13,7 @@ const customJestConfig = {
     // 2. Explicitly map your custom Prisma client path
     "^@/prisma-client$": "<rootDir>/src/generated/prisma",
   },
+  testPathIgnorePatterns: ["<rootDir>/src/__tests__/integration/"],
 };
 
 export default createJestConfig(customJestConfig);

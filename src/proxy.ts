@@ -123,7 +123,7 @@ export const proxy = auth(async function proxy(request) {
   const { success } = await rateLimiter.pro.limit(identifier);
   if (!success) {
     const response = NextResponse.next();
-    response.headers.set("X-splurge-ai-throttle", "true");
+    response.headers.set("X-Vektor-ai-throttle", "true");
     return response;
   }
   return NextResponse.next();
